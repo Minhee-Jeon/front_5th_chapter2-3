@@ -1,14 +1,14 @@
 {
-  "printWidth": 120,
+  "printWidth": 80,
   "quoteProps": "consistent",
   "singleAttributePerLine": false,
-	"singleQuote": true,
-	"trailingComma": "all",
-	"tabWidth": 2,
-	"semi": true,
-	"useTabs": false,
-	"bracketSpacing": true,
-	"arrowParens": "always",
-	"endOfLine": "auto",
-	"bracketSameLine": false
+  "singleQuote": true,
+  "trailingComma": "all",
+  "tabWidth": 2,
+  "semi": true,
+  "useTabs": false,
+  "bracketSpacing": true,
+  "arrowParens": "always",
+  "endOfLine": "auto",
+  "bracketSameLine": false
 }
