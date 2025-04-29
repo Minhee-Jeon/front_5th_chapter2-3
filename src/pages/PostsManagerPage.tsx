@@ -9,7 +9,8 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { Post, Comment, User, Tag } from '../types';
+import type { Post, Comment, User, Tag, Posts, Users } from '../types';
+import { get, post, put, patch, remove } from '../shared/api/fetchBased';
 import {
   Button,
   Card,
@@ -50,7 +51,7 @@ const PostsManager = () => {
   const [searchQuery, setSearchQuery] = useState(
     queryParams.get('search') || '',
   );
-  const [selectedPost, setSelectedPost] = useState(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [sortBy, setSortBy] = useState(queryParams.get('sortBy') || '');
   const [sortOrder, setSortOrder] = useState(
     queryParams.get('sortOrder') || 'asc',
@@ -88,16 +89,14 @@ const PostsManager = () => {
   // 게시물 가져오기
   const fetchPosts = () => {
     setLoading(true);
-    let postsData;
-    let usersData;
+    let postsData: Posts;
+    let usersData: Users['users'];
 
-    fetch(`/api/posts?limit=${limit}&skip=${skip}`)
-      .then((response) => response.json())
+    get(`/api/posts?limit=${limit}&skip=${skip}`)
       .then((data) => {
         postsData = data;
-        return fetch('/api/users?limit=0&select=username,image');
+        return get('/api/users?limit=0&select=username,image');
       })
-      .then((response) => response.json())
       .then((users) => {
         usersData = users.users;
         const postsWithUsers = postsData.posts.map((post) => ({
@@ -118,8 +117,7 @@ const PostsManager = () => {
   // 태그 가져오기
   const fetchTags = async () => {
     try {
-      const response = await fetch('/api/posts/tags');
-      const data = await response.json();
+      const data = await get('/api/posts/tags');
       setTags(data);
     } catch (error) {
       console.error('태그 가져오기 오류:', error);
@@ -134,8 +132,7 @@ const PostsManager = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch(`/api/posts/search?q=${searchQuery}`);
-      const data = await response.json();
+      const data = await get(`/api/posts/search?q=${searchQuery}`);
       setPosts(data.posts);
       setTotal(data.total);
     } catch (error) {
@@ -145,7 +142,7 @@ const PostsManager = () => {
   };
 
   // 태그별 게시물 가져오기
-  const fetchPostsByTag = async (tag) => {
+  const fetchPostsByTag = async (tag: string) => {
     if (!tag || tag === 'all') {
       fetchPosts();
       return;
@@ -153,11 +150,11 @@ const PostsManager = () => {
     setLoading(true);
     try {
       const [postsResponse, usersResponse] = await Promise.all([
-        fetch(`/api/posts/tag/${tag}`),
-        fetch('/api/users?limit=0&select=username,image'),
+        get(`/api/posts/tag/${tag}`),
+        get('/api/users?limit=0&select=username,image'),
       ]);
-      const postsData = await postsResponse.json();
-      const usersData = await usersResponse.json();
+      const postsData: Posts = await postsResponse;
+      const usersData: Users = await usersResponse;
 
       const postsWithUsers = postsData.posts.map((post) => ({
         ...post,
@@ -175,12 +172,7 @@ const PostsManager = () => {
   // 게시물 추가
   const addPost = async () => {
     try {
-      const response = await fetch('/api/posts/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPost),
-      });
-      const data = await response.json();
+      const data = await post('/api/posts/add', newPost);
       setPosts([data, ...posts]);
       setShowAddDialog(false);
       setNewPost({ title: '', body: '', userId: 1 });
@@ -192,12 +184,7 @@ const PostsManager = () => {
   // 게시물 업데이트
   const updatePost = async () => {
     try {
-      const response = await fetch(`/api/posts/${selectedPost.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(selectedPost),
-      });
-      const data = await response.json();
+      const data = await put(`/api/posts/${selectedPost?.id}`, selectedPost);
       setPosts(posts.map((post) => (post.id === data.id ? data : post)));
       setShowEditDialog(false);
     } catch (error) {
@@ -206,11 +193,9 @@ const PostsManager = () => {
   };
 
   // 게시물 삭제
-  const deletePost = async (id) => {
+  const deletePost = async (id: number) => {
     try {
-      await fetch(`/api/posts/${id}`, {
-        method: 'DELETE',
-      });
+      await remove(`/api/posts/${id}`);
       setPosts(posts.filter((post) => post.id !== id));
     } catch (error) {
       console.error('게시물 삭제 오류:', error);
@@ -218,11 +203,10 @@ const PostsManager = () => {
   };
 
   // 댓글 가져오기
-  const fetchComments = async (postId) => {
+  const fetchComments = async (postId: number) => {
     if (comments[postId]) return; // 이미 불러온 댓글이 있으면 다시 불러오지 않음
     try {
-      const response = await fetch(`/api/comments/post/${postId}`);
-      const data = await response.json();
+      const data = await get(`/api/comments/post/${postId}`);
       setComments((prev) => ({ ...prev, [postId]: data.comments }));
     } catch (error) {
       console.error('댓글 가져오기 오류:', error);
@@ -232,12 +216,7 @@ const PostsManager = () => {
   // 댓글 추가
   const addComment = async () => {
     try {
-      const response = await fetch('/api/comments/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newComment),
-      });
-      const data = await response.json();
+      const data = await post('/api/comments/add', newComment);
       setComments((prev) => ({
         ...prev,
         [data.postId]: [...(prev[data.postId] || []), data],
@@ -252,12 +231,9 @@ const PostsManager = () => {
   // 댓글 업데이트
   const updateComment = async () => {
     try {
-      const response = await fetch(`/api/comments/${selectedComment.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ body: selectedComment.body }),
+      const data = await put(`/api/comments/${selectedComment?.id}`, {
+        body: selectedComment?.body,
       });
-      const data = await response.json();
       setComments((prev) => ({
         ...prev,
         [data.postId]: prev[data.postId].map((comment) =>
@@ -271,11 +247,9 @@ const PostsManager = () => {
   };
 
   // 댓글 삭제
-  const deleteComment = async (id, postId) => {
+  const deleteComment = async (id: number, postId: number) => {
     try {
-      await fetch(`/api/comments/${id}`, {
-        method: 'DELETE',
-      });
+      await remove(`/api/comments/${id}`);
       setComments((prev) => ({
         ...prev,
         [postId]: prev[postId].filter((comment) => comment.id !== id),
@@ -286,16 +260,14 @@ const PostsManager = () => {
   };
 
   // 댓글 좋아요
-  const likeComment = async (id, postId) => {
+  const likeComment = async (id: number, postId: number) => {
     try {
-      const response = await fetch(`/api/comments/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          likes: comments[postId].find((c) => c.id === id).likes + 1,
-        }),
+      const comment = comments[postId].find((c) => c.id === id);
+      if (!comment) return;
+
+      const data = await patch(`/api/comments/${id}`, {
+        likes: (comment?.likes || 0) + 1,
       });
-      const data = await response.json();
       setComments((prev) => ({
         ...prev,
         [postId]: prev[postId].map((comment) =>
@@ -310,17 +282,16 @@ const PostsManager = () => {
   };
 
   // 게시물 상세 보기
-  const openPostDetail = (post) => {
+  const openPostDetail = (post: Post) => {
     setSelectedPost(post);
     fetchComments(post.id);
     setShowPostDetailDialog(true);
   };
 
   // 사용자 모달 열기
-  const openUserModal = async (user) => {
+  const openUserModal = async (user: User) => {
     try {
-      const response = await fetch(`/api/users/${user.id}`);
-      const userData = await response.json();
+      const userData = await get(`/api/users/${user.id}`);
       setSelectedUser(userData);
       setShowUserModal(true);
     } catch (error) {
@@ -468,7 +439,7 @@ const PostsManager = () => {
   );
 
   // 댓글 렌더링
-  const renderComments = (postId) => (
+  const renderComments = (postId: number) => (
     <div className="mt-2">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-semibold">댓글</h3>
@@ -687,6 +658,7 @@ const PostsManager = () => {
               placeholder="제목"
               value={selectedPost?.title || ''}
               onChange={(e) =>
+                selectedPost &&
                 setSelectedPost({ ...selectedPost, title: e.target.value })
               }
             />
@@ -695,6 +667,7 @@ const PostsManager = () => {
               placeholder="내용"
               value={selectedPost?.body || ''}
               onChange={(e) =>
+                selectedPost &&
                 setSelectedPost({ ...selectedPost, body: e.target.value })
               }
             />
@@ -739,6 +712,7 @@ const PostsManager = () => {
               placeholder="댓글 내용"
               value={selectedComment?.body || ''}
               onChange={(e) =>
+                selectedComment &&
                 setSelectedComment({ ...selectedComment, body: e.target.value })
               }
             />
@@ -755,12 +729,16 @@ const PostsManager = () => {
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>
-              {highlightText(selectedPost?.title, searchQuery)}
+              {selectedPost?.title &&
+                highlightText(selectedPost?.title, searchQuery)}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p>{highlightText(selectedPost?.body, searchQuery)}</p>
-            {renderComments(selectedPost?.id)}
+            <p>
+              {selectedPost?.body &&
+                highlightText(selectedPost?.body, searchQuery)}
+            </p>
+            {selectedPost?.id ? renderComments(selectedPost?.id) : null}
           </div>
         </DialogContent>
       </Dialog>
