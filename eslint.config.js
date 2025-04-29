@@ -3,6 +3,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import typescript from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
+import pluginQuery from '@tanstack/eslint-plugin-query';
 import prettier from 'eslint-config-prettier';
 import eslintPluginPrettier from 'eslint-plugin-prettier';
 import react from 'eslint-plugin-react';
@@ -12,6 +13,7 @@ import vitest from 'eslint-plugin-vitest';
 
 export default tseslint.config(
   { ignores: ['**/node_modules/**', 'dist/**'] },
+  ...pluginQuery.configs['flat/recommended'],
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
@@ -48,7 +50,10 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
       // Prettier 통합 규칙
       'prettier/prettier': 'error', // Prettier 포맷팅 오류를 ESLint 에러로 표시
 
