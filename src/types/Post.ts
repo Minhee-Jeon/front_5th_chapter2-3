@@ -1,3 +1,4 @@
+import { ApiResponseList } from '../shared/api/ApiResponseList';
 import { User } from './User';
 
 export interface Post {
@@ -12,3 +13,5 @@ export interface Post {
     dislikes: number;
   };
 }
+
+export type Posts = ApiResponseList<Post, 'posts'>;

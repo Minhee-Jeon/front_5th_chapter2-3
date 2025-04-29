@@ -1,3 +1,5 @@
+import { ApiResponseList } from '../shared/api/ApiResponseList';
+
 export interface User {
   id: number;
   username: string;
@@ -17,3 +19,5 @@ export interface User {
     title: string;
   };
 }
+
+export type Users = ApiResponseList<User, 'users'>;
