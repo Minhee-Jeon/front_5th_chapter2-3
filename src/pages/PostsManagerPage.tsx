@@ -9,6 +9,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import type { Post, Comment, User, Tag } from '../types';
 import {
   Button,
   Card,
@@ -40,7 +41,7 @@ const PostsManager = () => {
   const queryParams = new URLSearchParams(location.search);
 
   // 상태 관리
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [total, setTotal] = useState(0);
   const [skip, setSkip] = useState(parseInt(queryParams.get('skip') || '0'));
   const [limit, setLimit] = useState(
@@ -58,20 +59,19 @@ const PostsManager = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', body: '', userId: 1 });
   const [loading, setLoading] = useState(false);
-  const [tags, setTags] = useState([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [selectedTag, setSelectedTag] = useState(queryParams.get('tag') || '');
-  const [comments, setComments] = useState({});
-  const [selectedComment, setSelectedComment] = useState(null);
-  const [newComment, setNewComment] = useState({
+  const [comments, setComments] = useState<{ [postId: number]: Comment[] }>({});
+  const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
+  const [newComment, setNewComment] = useState<Partial<Comment>>({
     body: '',
-    postId: null,
-    userId: 1,
+    postId: undefined,
   });
   const [showAddCommentDialog, setShowAddCommentDialog] = useState(false);
   const [showEditCommentDialog, setShowEditCommentDialog] = useState(false);
   const [showPostDetailDialog, setShowPostDetailDialog] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // URL 업데이트 함수
   const updateURL = () => {
