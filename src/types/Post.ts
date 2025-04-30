@@ -15,3 +15,5 @@ export interface Post {
 }
 
 export type PostsResponse = ApiResponseList<Post, 'posts'>;
+
+export type NewPost = Pick<Post, 'title' | 'body' | 'userId'>;

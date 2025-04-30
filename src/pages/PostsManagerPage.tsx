@@ -17,11 +17,7 @@ import type {
   PostsResponse,
   UsersResponse,
 } from '../types';
-import {
-  useAddPost,
-  useUpdatePost,
-  useDeletePost,
-} from '../api/posts/usePostsMutations';
+import { useUpdatePost, useDeletePost } from '../api/posts/usePostsMutations';
 import { usePostsStoreSelector } from '../stores/posts/usePostsStore';
 import { useQueryPosts } from '../api/posts/usePostsQueries';
 import { useQueryUsers } from '../api/users/useUsersQueries';
@@ -50,6 +46,7 @@ import {
   TableRow,
   Textarea,
 } from '../shared/ui';
+import PostAddDialog from '../widgets/post/PostAddDialog';
 
 const PostsManager = () => {
   const navigate = useNavigate();
@@ -57,14 +54,12 @@ const PostsManager = () => {
   const queryParams = new URLSearchParams(location.search);
 
   // 상태 관리
-  const { posts, setPosts, addPost, updatePost, deletePost } =
-    usePostsStoreSelector([
-      'posts',
-      'setPosts',
-      'addPost',
-      'updatePost',
-      'deletePost',
-    ]);
+  const { posts, setPosts, updatePost, deletePost } = usePostsStoreSelector([
+    'posts',
+    'setPosts',
+    'updatePost',
+    'deletePost',
+  ]);
   const [total, setTotal] = useState(0);
   const [skip, setSkip] = useState(parseInt(queryParams.get('skip') || '0'));
   const [limit, setLimit] = useState(
@@ -80,7 +75,6 @@ const PostsManager = () => {
   );
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [newPost, setNewPost] = useState({ title: '', body: '', userId: 1 });
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const [selectedTag, setSelectedTag] = useState(queryParams.get('tag') || '');
@@ -105,7 +99,6 @@ const PostsManager = () => {
     isLoading: postsLoading,
     error: postsError,
   } = useQueryPosts(limit, skip);
-  const { mutateAsync: mutatePostAdd } = useAddPost();
   const { mutateAsync: mutatePostUpdate } = useUpdatePost();
   const { mutateAsync: mutatePostDelete } = useDeletePost();
 
@@ -203,21 +196,6 @@ const PostsManager = () => {
       console.error('태그별 게시물 가져오기 오류:', error);
     }
     setLoading(false);
-  };
-
-  // 게시물 추가
-  const handleAddPost = async () => {
-    try {
-      await mutatePostAdd(newPost, {
-        onSuccess: (post) => {
-          addPost(post);
-          setShowAddDialog(false);
-          setNewPost({ title: '', body: '', userId: 1 });
-        },
-      });
-    } catch (error) {
-      console.error('게시물 추가 오류:', error);
-    }
   };
 
   // 게시물 업데이트
@@ -674,37 +652,7 @@ const PostsManager = () => {
       </CardContent>
 
       {/* 게시물 추가 대화상자 */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>새 게시물 추가</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              placeholder="제목"
-              value={newPost.title}
-              onChange={(e) =>
-                setNewPost({ ...newPost, title: e.target.value })
-              }
-            />
-            <Textarea
-              rows={30}
-              placeholder="내용"
-              value={newPost.body}
-              onChange={(e) => setNewPost({ ...newPost, body: e.target.value })}
-            />
-            <Input
-              type="number"
-              placeholder="사용자 ID"
-              value={newPost.userId}
-              onChange={(e) =>
-                setNewPost({ ...newPost, userId: Number(e.target.value) })
-              }
-            />
-            <Button onClick={handleAddPost}>게시물 추가</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <PostAddDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
 
       {/* 게시물 수정 대화상자 */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
