@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { Post, Comment, User, Tag, Posts, Users } from '../types';
+import { postsApi } from '../api/posts/postsApi';
 import { get, post, put, patch, remove } from '../shared/api/fetchBased';
 import { usePostsStoreSelector } from '../stores/posts/usePostsStore';
 import {
@@ -100,7 +101,8 @@ const PostsManager = () => {
     let postsData: Posts;
     let usersData: Users['users'];
 
-    get(`/api/posts?limit=${limit}&skip=${skip}`)
+    postsApi
+      .getPosts(limit, skip)
       .then((data) => {
         postsData = data;
         return get('/api/users?limit=0&select=username,image');
@@ -180,7 +182,7 @@ const PostsManager = () => {
   // 게시물 추가
   const handleAddPost = async () => {
     try {
-      const data = await post('/api/posts/add', newPost);
+      const data = await postsApi.addPost(newPost);
       addPost(data);
       setShowAddDialog(false);
       setNewPost({ title: '', body: '', userId: 1 });
@@ -192,7 +194,7 @@ const PostsManager = () => {
   // 게시물 업데이트
   const handleUpdatePost = async () => {
     try {
-      const data = await put(`/api/posts/${selectedPost?.id}`, selectedPost);
+      const data = await postsApi.updatePost(selectedPost);
       updatePost(data);
       setShowEditDialog(false);
     } catch (error) {
@@ -203,7 +205,7 @@ const PostsManager = () => {
   // 게시물 삭제
   const handleDeletePost = async (id: number) => {
     try {
-      await remove(`/api/posts/${id}`);
+      await postsApi.deletePost(id);
       deletePost(id);
     } catch (error) {
       console.error('게시물 삭제 오류:', error);
