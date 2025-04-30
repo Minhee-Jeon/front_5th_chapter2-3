@@ -9,10 +9,23 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { Post, Comment, User, Tag, Users, PostsResponse } from '../types';
-import { postsApi } from '../api/posts/postsApi';
-import { get, post, put, patch, remove } from '../shared/api/fetchBased';
+import type {
+  Post,
+  Comment,
+  User,
+  Tag,
+  PostsResponse,
+  UsersResponse,
+} from '../types';
+import {
+  useAddPost,
+  useUpdatePost,
+  useDeletePost,
+} from '../api/posts/usePostsMutations';
 import { usePostsStoreSelector } from '../stores/posts/usePostsStore';
+import { useQueryPosts } from '../api/posts/usePostsQueries';
+import { useQueryUsers } from '../api/users/useUsersQueries';
+import { get, post, put, patch, remove } from '../shared/api/fetchBased';
 import {
   Button,
   Card,
@@ -73,15 +86,34 @@ const PostsManager = () => {
   const [selectedTag, setSelectedTag] = useState(queryParams.get('tag') || '');
   const [comments, setComments] = useState<{ [postId: number]: Comment[] }>({});
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
-  const [newComment, setNewComment] = useState<Partial<Comment>>({
+  const [newComment, setNewComment] = useState<
+    Partial<Comment> & { userId: User['id'] }
+  >({
     body: '',
     postId: undefined,
+    userId: 1,
   });
   const [showAddCommentDialog, setShowAddCommentDialog] = useState(false);
   const [showEditCommentDialog, setShowEditCommentDialog] = useState(false);
   const [showPostDetailDialog, setShowPostDetailDialog] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  // post 관련 hook
+  const {
+    data: postsData,
+    isLoading: postsLoading,
+    error: postsError,
+  } = useQueryPosts(limit, skip);
+  const { mutateAsync: mutatePostAdd } = useAddPost();
+  const { mutateAsync: mutatePostUpdate } = useUpdatePost();
+  const { mutateAsync: mutatePostDelete } = useDeletePost();
+
+  const {
+    data: usersData,
+    isLoading: usersLoading,
+    error: usersError,
+  } = useQueryUsers();
 
   // URL 업데이트 함수
   const updateURL = () => {
@@ -98,30 +130,24 @@ const PostsManager = () => {
   // 게시물 가져오기
   const fetchPosts = () => {
     setLoading(true);
-    let postsData: PostsResponse;
-    let usersData: Users['users'];
 
-    postsApi
-      .getPosts(limit, skip)
-      .then((data) => {
-        postsData = data;
-        return get('/api/users?limit=0&select=username,image');
-      })
-      .then((users) => {
-        usersData = users.users;
-        const postsWithUsers = postsData.posts.map((post) => ({
-          ...post,
-          author: usersData.find((user) => user.id === post.userId),
-        }));
-        setPosts(postsWithUsers);
-        setTotal(postsData.total);
-      })
-      .catch((error) => {
-        console.error('게시물 가져오기 오류:', error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    if (postsLoading || usersLoading) return;
+    if (postsError) {
+      console.error('게시물 가져오기 오류: ', postsError);
+      return;
+    }
+    if (usersError) {
+      console.error('사용자 정보 가져오기 오류: ', postsError);
+      return;
+    }
+    if (!postsData || !usersData) return;
+
+    const postsWithUsers = postsData.posts.map((post) => ({
+      ...post,
+      author: usersData.users.find((user) => user.id === post.userId),
+    }));
+    setPosts(postsWithUsers);
+    setTotal(postsData.total);
   };
 
   // 태그 가져오기
@@ -164,7 +190,7 @@ const PostsManager = () => {
         get('/api/users?limit=0&select=username,image'),
       ]);
       const postsData: PostsResponse = await postsResponse;
-      const usersData: Users = await usersResponse;
+      const usersData: UsersResponse = await usersResponse;
 
       const postsWithUsers = postsData.posts.map((post) => ({
         ...post,
@@ -182,10 +208,13 @@ const PostsManager = () => {
   // 게시물 추가
   const handleAddPost = async () => {
     try {
-      const data = await postsApi.addPost(newPost);
-      addPost(data);
-      setShowAddDialog(false);
-      setNewPost({ title: '', body: '', userId: 1 });
+      await mutatePostAdd(newPost, {
+        onSuccess: (post) => {
+          addPost(post);
+          setShowAddDialog(false);
+          setNewPost({ title: '', body: '', userId: 1 });
+        },
+      });
     } catch (error) {
       console.error('게시물 추가 오류:', error);
     }
@@ -194,9 +223,12 @@ const PostsManager = () => {
   // 게시물 업데이트
   const handleUpdatePost = async () => {
     try {
-      const data = await postsApi.updatePost(selectedPost);
-      updatePost(data);
-      setShowEditDialog(false);
+      await mutatePostUpdate(selectedPost!, {
+        onSuccess: (updatedPost) => {
+          updatePost(updatedPost);
+          setShowEditDialog(false);
+        },
+      });
     } catch (error) {
       console.error('게시물 업데이트 오류:', error);
     }
@@ -205,8 +237,13 @@ const PostsManager = () => {
   // 게시물 삭제
   const handleDeletePost = async (id: number) => {
     try {
-      await postsApi.deletePost(id);
-      deletePost(id);
+      // await postsApi.deletePost(id);
+      // deletePost(id);
+      mutatePostDelete(id, {
+        onSuccess: () => {
+          deletePost(id);
+        },
+      });
     } catch (error) {
       console.error('게시물 삭제 오류:', error);
     }
@@ -232,7 +269,7 @@ const PostsManager = () => {
         [data.postId]: [...(prev[data.postId] || []), data],
       }));
       setShowAddCommentDialog(false);
-      setNewComment({ body: '', postId: null, userId: 1 });
+      setNewComment({ body: '', postId: undefined, userId: 1 });
     } catch (error) {
       console.error('댓글 추가 오류:', error);
     }
@@ -332,6 +369,18 @@ const PostsManager = () => {
     setSelectedTag(params.get('tag') || '');
   }, [location.search]);
 
+  useEffect(() => {
+    if (postsData && usersData) {
+      setTotal(postsData.total);
+      const postsWithUsers = postsData.posts.map((post) => ({
+        ...post,
+        author: usersData?.users?.find((user) => user.id === post.userId),
+      }));
+      setPosts(postsWithUsers);
+      setLoading(false);
+    }
+  }, [postsData, usersData, setPosts]);
+
   // 하이라이트 함수 추가
   const highlightText = (text: string, highlight: string) => {
     if (!text) return null;
@@ -396,7 +445,7 @@ const PostsManager = () => {
             <TableCell>
               <div
                 className="flex items-center space-x-2 cursor-pointer"
-                onClick={() => openUserModal(post.author)}
+                onClick={() => openUserModal(post.author!)}
               >
                 <img
                   src={post.author?.image}
