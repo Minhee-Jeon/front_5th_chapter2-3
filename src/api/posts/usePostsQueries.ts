@@ -7,7 +7,7 @@ import { PostsResponse } from '../../types';
 /**
  * 게시글 목록 조회
  */
-export const usePostList = (limit: number, skip: number) =>
+export const useQueryPosts = (limit: number, skip: number) =>
   useQuery<
     PostsResponse,
     Error,
@@ -22,7 +22,7 @@ export const usePostList = (limit: number, skip: number) =>
 /**
  * 단일 게시물 조회
  */
-export const usePost = (id: number) =>
+export const useQueryPostById = (id: number) =>
   useQuery<Post, Error, Post, readonly ['posts', 'detail', number]>({
     ...postsQueryKeys.detail(id),
     // id가 존재할 때에만 요청 보내기
