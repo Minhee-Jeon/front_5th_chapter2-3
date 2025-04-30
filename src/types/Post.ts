@@ -14,4 +14,4 @@ export interface Post {
   };
 }
 
-export type Posts = ApiResponseList<Post, 'posts'>;
+export type PostsResponse = ApiResponseList<Post, 'posts'>;

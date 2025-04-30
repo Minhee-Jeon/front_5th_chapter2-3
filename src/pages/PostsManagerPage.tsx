@@ -9,7 +9,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { Post, Comment, User, Tag, Posts, Users } from '../types';
+import type { Post, Comment, User, Tag, Users, PostsResponse } from '../types';
 import { postsApi } from '../api/posts/postsApi';
 import { get, post, put, patch, remove } from '../shared/api/fetchBased';
 import { usePostsStoreSelector } from '../stores/posts/usePostsStore';
@@ -98,7 +98,7 @@ const PostsManager = () => {
   // 게시물 가져오기
   const fetchPosts = () => {
     setLoading(true);
-    let postsData: Posts;
+    let postsData: PostsResponse;
     let usersData: Users['users'];
 
     postsApi
@@ -163,7 +163,7 @@ const PostsManager = () => {
         get(`/api/posts/tag/${tag}`),
         get('/api/users?limit=0&select=username,image'),
       ]);
-      const postsData: Posts = await postsResponse;
+      const postsData: PostsResponse = await postsResponse;
       const usersData: Users = await usersResponse;
 
       const postsWithUsers = postsData.posts.map((post) => ({

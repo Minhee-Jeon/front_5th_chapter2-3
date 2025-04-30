@@ -2,16 +2,16 @@ import { useQuery } from '@tanstack/react-query';
 import { postsQueryKeys } from '../../config/posts/postQueryKeys';
 
 import type { Post } from '../../types';
-import type { Posts } from '../../types';
+import { PostsResponse } from '../../types';
 
 /**
  * 게시글 목록 조회
  */
 export const usePostList = (limit: number, skip: number) =>
   useQuery<
-    Posts,
+    PostsResponse,
     Error,
-    Posts,
+    PostsResponse,
     readonly ['posts', 'list', { params: { limit: number; skip: number } }]
   >({
     ...postsQueryKeys.list({ limit, skip }),
