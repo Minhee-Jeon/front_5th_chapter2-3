@@ -11,6 +11,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { Post, Comment, User, Tag, Posts, Users } from '../types';
 import { get, post, put, patch, remove } from '../shared/api/fetchBased';
+import { usePostsStoreSelector } from '../stores/posts/usePostsStore';
 import {
   Button,
   Card,
@@ -42,7 +43,14 @@ const PostsManager = () => {
   const queryParams = new URLSearchParams(location.search);
 
   // 상태 관리
-  const [posts, setPosts] = useState<Post[]>([]);
+  const { posts, setPosts, addPost, updatePost, deletePost } =
+    usePostsStoreSelector([
+      'posts',
+      'setPosts',
+      'addPost',
+      'updatePost',
+      'deletePost',
+    ]);
   const [total, setTotal] = useState(0);
   const [skip, setSkip] = useState(parseInt(queryParams.get('skip') || '0'));
   const [limit, setLimit] = useState(
@@ -170,10 +178,10 @@ const PostsManager = () => {
   };
 
   // 게시물 추가
-  const addPost = async () => {
+  const handleAddPost = async () => {
     try {
       const data = await post('/api/posts/add', newPost);
-      setPosts([data, ...posts]);
+      addPost(data);
       setShowAddDialog(false);
       setNewPost({ title: '', body: '', userId: 1 });
     } catch (error) {
@@ -182,10 +190,10 @@ const PostsManager = () => {
   };
 
   // 게시물 업데이트
-  const updatePost = async () => {
+  const handleUpdatePost = async () => {
     try {
       const data = await put(`/api/posts/${selectedPost?.id}`, selectedPost);
-      setPosts(posts.map((post) => (post.id === data.id ? data : post)));
+      updatePost(data);
       setShowEditDialog(false);
     } catch (error) {
       console.error('게시물 업데이트 오류:', error);
@@ -193,10 +201,10 @@ const PostsManager = () => {
   };
 
   // 게시물 삭제
-  const deletePost = async (id: number) => {
+  const handleDeletePost = async (id: number) => {
     try {
       await remove(`/api/posts/${id}`);
-      setPosts(posts.filter((post) => post.id !== id));
+      deletePost(id);
     } catch (error) {
       console.error('게시물 삭제 오류:', error);
     }
@@ -426,7 +434,7 @@ const PostsManager = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => deletePost(post.id)}
+                  onClick={() => handleDeletePost(post.id)}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -642,7 +650,7 @@ const PostsManager = () => {
                 setNewPost({ ...newPost, userId: Number(e.target.value) })
               }
             />
-            <Button onClick={addPost}>게시물 추가</Button>
+            <Button onClick={handleAddPost}>게시물 추가</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -671,7 +679,7 @@ const PostsManager = () => {
                 setSelectedPost({ ...selectedPost, body: e.target.value })
               }
             />
-            <Button onClick={updatePost}>게시물 업데이트</Button>
+            <Button onClick={handleUpdatePost}>게시물 업데이트</Button>
           </div>
         </DialogContent>
       </Dialog>

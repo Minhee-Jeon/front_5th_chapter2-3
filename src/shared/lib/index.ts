@@ -1,0 +1,1 @@
+export { createStoreSelector } from './createStoreSelector';
