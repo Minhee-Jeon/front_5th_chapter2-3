@@ -1,6 +1,6 @@
 import { useDeletePost } from '../../api/posts/usePostsMutations';
 import { useUrlParams } from '../../lib/posts/useUrlParams';
-import { usePostsStoreSelector } from '../../stores/posts/usePostsStore';
+import { useQueryPostsWithUsers } from '../../api/posts/usePostsQueries';
 import { useSelectedPostStore } from '../../stores/posts/useSelectedPostStore';
 import { Post, User } from '../../types';
 import {
@@ -32,25 +32,17 @@ export default function PostTable({
   onPostUpdateDialogOpen,
   onPostDetail,
 }: Props) {
-  const { posts, deletePost } = usePostsStoreSelector(['posts', 'deletePost']);
+  const { updateParams, ...params } = useUrlParams();
+  const { data: posts } = useQueryPostsWithUsers({ ...params });
   const setSelectedPost = useSelectedPostStore(
     (state) => state.setSelectedPost,
   );
   const { mutateAsync: mutatePostDelete } = useDeletePost();
-  const {
-    tag: selectedTag,
-    search: searchQuery,
-    updateParams,
-  } = useUrlParams();
 
   // 게시물 삭제
   const handleDeletePost = async (id: number) => {
     try {
-      await mutatePostDelete(id, {
-        onSuccess: () => {
-          deletePost(id);
-        },
-      });
+      await mutatePostDelete(id);
     } catch (error) {
       console.error('게시물 삭제 오류:', error);
     }
@@ -73,20 +65,23 @@ export default function PostTable({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {posts.map((post) => (
+        {posts?.map((post) => (
           <TableRow key={post.id}>
             <TableCell>{post.id}</TableCell>
             <TableCell>
               <div className="space-y-1">
                 <div>
-                  <HighlightedText text={post.title} highlight={searchQuery} />
+                  <HighlightedText
+                    text={post.title}
+                    highlight={params.search}
+                  />
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {post.tags?.map((tag) => (
                     <span
                       key={tag}
                       className={`px-1 text-[9px] font-semibold rounded-[4px] cursor-pointer ${
-                        selectedTag === tag
+                        params.tag === tag
                           ? 'text-white bg-blue-500 hover:bg-blue-600'
                           : 'text-blue-800 bg-blue-100 hover:bg-blue-200'
                       }`}
