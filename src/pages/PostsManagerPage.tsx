@@ -1,13 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  Edit2,
-  MessageSquare,
-  Plus,
-  Search,
-  ThumbsDown,
-  ThumbsUp,
-  Trash2,
-} from 'lucide-react';
+import { Edit2, Plus, Search, ThumbsUp, Trash2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type {
   Post,
@@ -17,7 +9,6 @@ import type {
   PostsResponse,
   UsersResponse,
 } from '../types';
-import { useDeletePost } from '../api/posts/usePostsMutations';
 import { usePostsStoreSelector } from '../stores/posts/usePostsStore';
 import { useQueryPosts } from '../api/posts/usePostsQueries';
 import { useQueryUsers } from '../api/users/useUsersQueries';
@@ -34,12 +25,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   Textarea,
 } from '../shared/ui';
 import { BaseDialog } from '../widgets/ui/BaseDialog';
@@ -52,6 +37,7 @@ import { useUserDialog } from '../model/dialog/useUserDialog';
 import PostAddDialog from '../widgets/post/PostAddDialog';
 import PostUpdateDialog from '../widgets/post/PostUpdateDialog';
 import UserDialog from '../widgets/UserDialog';
+import PostTable from '../widgets/post/PostTable';
 
 const PostsManager = () => {
   const navigate = useNavigate();
@@ -59,11 +45,7 @@ const PostsManager = () => {
   const queryParams = new URLSearchParams(location.search);
 
   // 상태 관리
-  const { posts, setPosts, deletePost } = usePostsStoreSelector([
-    'posts',
-    'setPosts',
-    'deletePost',
-  ]);
+  const { setPosts } = usePostsStoreSelector(['setPosts']);
   const [total, setTotal] = useState(0);
   const [skip, setSkip] = useState(parseInt(queryParams.get('skip') || '0'));
   const [limit, setLimit] = useState(
@@ -103,7 +85,6 @@ const PostsManager = () => {
     isLoading: postsLoading,
     error: postsError,
   } = useQueryPosts(limit, skip);
-  const { mutateAsync: mutatePostDelete } = useDeletePost();
 
   const {
     data: usersData,
@@ -141,7 +122,7 @@ const PostsManager = () => {
     const postsWithUsers = postsData.posts.map((post) => ({
       ...post,
       author: usersData.users.find((user) => user.id === post.userId),
-    }));
+    })) as Post[];
     setPosts(postsWithUsers);
     setTotal(postsData.total);
   };
@@ -199,21 +180,6 @@ const PostsManager = () => {
       console.error('태그별 게시물 가져오기 오류:', error);
     }
     setLoading(false);
-  };
-
-  // 게시물 삭제
-  const handleDeletePost = async (id: number) => {
-    try {
-      // await postsApi.deletePost(id);
-      // deletePost(id);
-      mutatePostDelete(id, {
-        onSuccess: () => {
-          deletePost(id);
-        },
-      });
-    } catch (error) {
-      console.error('게시물 삭제 오류:', error);
-    }
   };
 
   // 댓글 가져오기
@@ -336,102 +302,6 @@ const PostsManager = () => {
       setLoading(false);
     }
   }, [postsData, usersData, setPosts]);
-
-  // 게시물 테이블 렌더링
-  const renderPostTable = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[50px]">ID</TableHead>
-          <TableHead>제목</TableHead>
-          <TableHead className="w-[150px]">작성자</TableHead>
-          <TableHead className="w-[150px]">반응</TableHead>
-          <TableHead className="w-[150px]">작업</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {posts.map((post) => (
-          <TableRow key={post.id}>
-            <TableCell>{post.id}</TableCell>
-            <TableCell>
-              <div className="space-y-1">
-                <div>
-                  <HighlightedText text={post.title} highlight={searchQuery} />
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {post.tags?.map((tag) => (
-                    <span
-                      key={tag}
-                      className={`px-1 text-[9px] font-semibold rounded-[4px] cursor-pointer ${
-                        selectedTag === tag
-                          ? 'text-white bg-blue-500 hover:bg-blue-600'
-                          : 'text-blue-800 bg-blue-100 hover:bg-blue-200'
-                      }`}
-                      onClick={() => {
-                        setSelectedTag(tag);
-                        updateURL();
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div
-                className="flex items-center space-x-2 cursor-pointer"
-                onClick={() => userDialogState.onOpenUserDialog(post.author!)}
-              >
-                <img
-                  src={post.author?.image}
-                  alt={post.author?.username}
-                  className="w-8 h-8 rounded-full"
-                />
-                <span>{post.author?.username}</span>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <ThumbsUp className="w-4 h-4" />
-                <span>{post.reactions?.likes || 0}</span>
-                <ThumbsDown className="w-4 h-4" />
-                <span>{post.reactions?.dislikes || 0}</span>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => openPostDetail(post)}
-                >
-                  <MessageSquare className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedPost(post);
-                    postUpdateDialogState.open();
-                  }}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeletePost(post.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
 
   // 댓글 렌더링
   const renderComments = (postId: number) => (
@@ -569,7 +439,15 @@ const PostsManager = () => {
           {loading ? (
             <div className="flex justify-center p-4">로딩 중...</div>
           ) : (
-            renderPostTable()
+            <PostTable
+              searchQuery={searchQuery}
+              updateURL={updateURL}
+              onUserClick={userDialogState.onOpenUserDialog}
+              onPostDetail={openPostDetail}
+              onPostAddDialogOpen={postAddDialogState.open}
+              selectedTag={selectedTag}
+              setSelectedTag={setSelectedTag}
+            />
           )}
 
           {/* 페이지네이션 */}
