@@ -1,4 +1,4 @@
-import { commentsApi } from './commentsApi';
+import { commentsApi } from '../../entities/comments/api/commentsApi';
 import type { Comment } from '../../types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 

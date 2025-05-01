@@ -3,7 +3,8 @@ import { useUrlParams } from '../../lib/posts/useUrlParams';
 import { useQueryPostsWithUsers } from '../../api/posts/usePostsQueries';
 import { useSelectedPostStoreSelector } from '../../stores/posts/useSelectedPostStore';
 import { useCommentsStoreSelector } from '../../stores/comments/useCommentsStore';
-import { Post, User } from '../../types';
+import { Post } from '../../entities/posts/model/Post';
+import { User } from '../../types';
 import {
   Edit2,
   MessageSquare,

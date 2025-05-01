@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { postsQueryKeys } from '../../config/posts/postQueryKeys';
-import { postsApi } from './postsApi';
-import { PostsUrlParams } from '../../lib/posts/PostUrlParams';
+import { postsApi } from '../../entities/posts/api/postsApi';
+import { PostsUrlParams } from '../../entities/posts/model/PostUrlParams';
 
 import type { Post } from '../../types';
 import { PostsResponse } from '../../types';

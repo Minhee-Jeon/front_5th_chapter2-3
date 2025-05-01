@@ -1,12 +1,9 @@
-import type {
-  Post,
-  PostsResponse,
-  UserResponse,
-  UsersResponse,
-} from '../../types';
-import { PostsUrlParams } from '../../lib/posts/PostUrlParams';
-import { get, post, put, remove } from '../../shared/api/fetchBased';
-import { getMswUrl } from '../../shared/constants/mswUrl';
+import type { UserResponse, UsersResponse } from '../../../types';
+import { PostsUrlParams } from '../model/PostUrlParams';
+import { get, post, put, remove } from '../../../shared/api/fetchBased';
+import { getMswUrl } from '../../../shared/constants/mswUrl';
+import { Post } from '../model/Post';
+import { PostsResponse } from './PostsResponse';
 
 const getPosts = async (params: string): Promise<PostsResponse> => {
   const url = `${getMswUrl}/posts?${params}`;

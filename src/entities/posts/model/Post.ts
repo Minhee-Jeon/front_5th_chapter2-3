@@ -1,5 +1,5 @@
-import { ApiResponseList } from '../shared/api/ApiResponseList';
-import { UserResponse } from './User';
+import { ApiResponseList } from '../../../shared/api';
+import { UserResponse } from '../../../types';
 
 export interface Post {
   id: number;
@@ -15,5 +15,3 @@ export interface Post {
 }
 
 export type PostsResponse = ApiResponseList<Post, 'posts'>;
-
-export type NewPost = Pick<Post, 'title' | 'body' | 'userId'>;

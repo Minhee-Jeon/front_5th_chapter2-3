@@ -1,6 +1,6 @@
-import { get, post, put, patch, remove } from '../../shared/api/fetchBased';
-import { getMswUrl } from '../../shared/constants/mswUrl';
-import type { Comment } from '../../types';
+import { get, post, put, patch, remove } from '../../../shared/api/fetchBased';
+import { getMswUrl } from '../../../shared/constants/mswUrl';
+import type { Comment } from '../../../types';
 
 const fetchComments = async (postId: number): Promise<Comment[]> => {
   const url = `${getMswUrl}/comments/post/${postId}`;

@@ -1,4 +1,4 @@
-import { NewPost } from '../../types/Post';
+import { NewPost } from '../../entities/posts/model/NewPost';
 
 export const initialNewPost: NewPost = {
   title: '',

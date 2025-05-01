@@ -1,5 +1,3 @@
-import { ApiResponseList } from '../shared/api/ApiResponseList';
-
 export interface Comment {
   id: number;
   body: string;
@@ -10,5 +8,3 @@ export interface Comment {
     username: string;
   };
 }
-
-export type Comments = ApiResponseList<Comment, 'comments'>;

@@ -1,10 +1,4 @@
-import { ApiResponseList } from '../shared/api/ApiResponseList';
-
-export interface User {
-  id: number;
-  username: string;
-  image: string;
-}
+import { ApiResponseList } from '../../../shared/api';
 
 /*****  UserResponse *****/
 interface Coordinates {
