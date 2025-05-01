@@ -21,14 +21,14 @@ import { BaseDialog } from '../widgets/ui/BaseDialog';
 import { HighlightedText } from '../shared/ui/HighlightedText';
 
 import { useSelectedPostStore } from '../stores/posts/useSelectedPostStore';
-import { usePostAddDialog } from '../model/dialog/usePostDialog';
-import { usePostUpdateDialog } from '../model/dialog/usePostDialog';
+import { useDialog } from '../model/dialog/useDialog';
 import { useUserDialog } from '../model/dialog/useUserDialog';
 import PostAddDialog from '../widgets/post/PostAddDialog';
 import PostUpdateDialog from '../widgets/post/PostUpdateDialog';
 import UserDialog from '../widgets/UserDialog';
 import PostTable from '../widgets/post/PostTable';
 import PostSearchFilter from '../widgets/post/PostSearchFilter';
+import PostDetailDialog from '../widgets/post/PostDetailDialog';
 
 const PostsManager = () => {
   const {
@@ -40,7 +40,7 @@ const PostsManager = () => {
   } = useUrlParams();
 
   // 상태 관리
-  const { selectedPost, setSelectedPost } = useSelectedPostStore();
+  const { setSelectedPost } = useSelectedPostStore();
   const [comments, setComments] = useState<{ [postId: number]: Comment[] }>({});
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
   const [newComment, setNewComment] = useState<
@@ -53,10 +53,10 @@ const PostsManager = () => {
 
   const [showAddCommentDialog, setShowAddCommentDialog] = useState(false);
   const [showEditCommentDialog, setShowEditCommentDialog] = useState(false);
-  const [showPostDetailDialog, setShowPostDetailDialog] = useState(false);
 
-  const { dialog: postAddDialogState } = usePostAddDialog();
-  const { dialog: postUpdateDialogState } = usePostUpdateDialog();
+  const postAddDialogState = useDialog();
+  const postUpdateDialogState = useDialog();
+  const postDetailDialogState = useDialog();
   const userDialogState = useUserDialog();
 
   // post 데이터 가져오기
@@ -66,14 +66,6 @@ const PostsManager = () => {
     search: searchQuery,
     tag: selectedTag,
   });
-
-  // const setPosts = usePostsStore((state) => state.setPosts);
-
-  // useEffect(() => {
-  //   if (postsData?.posts) {
-  //     setPosts(postsData.posts);
-  //   }
-  // }, [postsData, setPosts]);
 
   // 댓글 가져오기
   const fetchComments = async (postId: number) => {
@@ -155,10 +147,10 @@ const PostsManager = () => {
   };
 
   // 게시물 상세 보기
-  const openPostDetail = (post: Post) => {
+  const openPostDetailOpen = (post: Post) => {
     setSelectedPost(post);
     fetchComments(post.id);
-    setShowPostDetailDialog(true);
+    postDetailDialogState.open();
   };
 
   // 댓글 렌더링
@@ -246,7 +238,7 @@ const PostsManager = () => {
           ) : (
             <PostTable
               onUserClick={userDialogState.onOpenUserDialog}
-              onPostDetail={openPostDetail}
+              onPostDetail={openPostDetailOpen}
               onPostUpdateDialogOpen={postUpdateDialogState.open}
             />
           )}
@@ -332,28 +324,10 @@ const PostsManager = () => {
       </BaseDialog>
 
       {/* 게시물 상세 보기 대화상자 */}
-      <BaseDialog
-        open={showPostDetailDialog}
-        onOpenChange={setShowPostDetailDialog}
-        title={
-          selectedPost?.title && (
-            <HighlightedText
-              text={selectedPost?.title}
-              highlight={searchQuery}
-            />
-          )
-        }
-      >
-        <p>
-          {selectedPost?.body && (
-            <HighlightedText
-              text={selectedPost?.body}
-              highlight={searchQuery}
-            />
-          )}
-        </p>
-        {selectedPost?.id ? renderComments(selectedPost?.id) : null}
-      </BaseDialog>
+      <PostDetailDialog
+        state={postDetailDialogState}
+        renderComments={renderComments}
+      />
 
       {/* 사용자 모달 */}
       <UserDialog state={userDialogState} />

@@ -1,12 +1,12 @@
 import { BaseDialog } from '../ui/BaseDialog';
-import type { usePostAddDialog } from '../../model/dialog/usePostDialog';
+import type { useDialog } from '../../model/dialog/useDialog';
 import { usePostsStoreSelector } from '../../stores/posts/usePostsStore';
 import { useAddPost } from '../../api/posts/usePostsMutations';
 import { useNewPost } from '../../model/posts/useNewPost';
 import { Button, Input, Textarea } from '../../shared/ui';
 
 interface Props {
-  state: ReturnType<typeof usePostAddDialog>['dialog'];
+  state: ReturnType<typeof useDialog>;
 }
 
 export default function PostAddDialog({ state }: Props) {
