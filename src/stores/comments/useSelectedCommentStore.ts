@@ -1,5 +1,6 @@
 import type { Comment } from '../../types';
 import { create } from 'zustand';
+import { createStoreSelector } from '../../shared/lib';
 
 export const useSelectedCommentStore = create<{
   selectedComment: Comment | null;
@@ -8,3 +9,7 @@ export const useSelectedCommentStore = create<{
   selectedComment: null,
   setSelectedComment: (comment) => set({ selectedComment: comment }),
 }));
+
+export const useSelectedCommentStoreSelector = createStoreSelector(
+  useSelectedCommentStore,
+);

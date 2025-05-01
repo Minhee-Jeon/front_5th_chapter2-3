@@ -9,7 +9,7 @@ interface Props {
   state: ReturnType<typeof useDialog>;
 }
 /**
- * Post 추가 다이얼로그
+ * Comment 추가 다이얼로그
  */
 export default function CommentAddDialog({ state }: Props) {
   const { setComments } = useCommentsStoreSelector(['setComments']);
