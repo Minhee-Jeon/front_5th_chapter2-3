@@ -1,18 +1,5 @@
 import { Plus } from 'lucide-react';
-import { useUrlParams } from '../lib/posts/useUrlParams';
-import { useQueryPosts } from '../api/posts/usePostsQueries';
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../shared/ui';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '../shared/ui';
 
 import { useDialog } from '../model/dialog/useDialog';
 import { useUserDialog } from '../model/dialog/useUserDialog';
@@ -23,33 +10,18 @@ import UserDialog from '../widgets/UserDialog';
 import PostTable from '../widgets/post/PostTable';
 import PostSearchFilter from '../widgets/post/PostSearchFilter';
 import PostDetailDialog from '../widgets/post/PostDetailDialog';
+import PostPagination from '../widgets/post/PostPagination';
 import CommentAddDialog from '../widgets/comments/CommentAddDialog';
 import { CommentList } from '../widgets/comments/CommentList';
 import CommentEditDialog from '../widgets/comments/CommentEditDialog';
 
 const PostsManager = () => {
-  const {
-    skip,
-    limit,
-    search: searchQuery,
-    tag: selectedTag,
-    updateParams,
-  } = useUrlParams();
-
   const postAddDialogState = useDialog();
   const postUpdateDialogState = useDialog();
   const postDetailDialogState = useDialog();
   const userDialogState = useUserDialog();
   const commentAddDialogState = useDialog();
   const commentEditDialogState = useDialog();
-
-  // post 데이터 가져오기
-  const { data: postsData } = useQueryPosts({
-    limit,
-    skip,
-    search: searchQuery,
-    tag: selectedTag,
-  });
 
   return (
     <Card className="w-full max-w-6xl mx-auto">
@@ -75,55 +47,17 @@ const PostsManager = () => {
           />
 
           {/* 페이지네이션 */}
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span>표시</span>
-              <Select
-                value={limit.toString()}
-                onValueChange={(value) =>
-                  updateParams({ limit: Number(value) })
-                }
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="10" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="30">30</SelectItem>
-                </SelectContent>
-              </Select>
-              <span>항목</span>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                disabled={skip === 0}
-                onClick={() =>
-                  updateParams({ skip: Math.max(0, skip - limit) })
-                }
-              >
-                이전
-              </Button>
-              <Button
-                disabled={skip + limit >= (postsData?.total ?? 0)}
-                onClick={() => updateParams({ skip: skip + limit })}
-              >
-                다음
-              </Button>
-            </div>
-          </div>
+          <PostPagination />
         </div>
       </CardContent>
 
       {/* 게시물 추가 대화상자 */}
       <PostAddDialog state={postAddDialogState} />
-
       {/* 게시물 수정 대화상자 */}
       <PostUpdateDialog state={postUpdateDialogState} />
 
       {/* 댓글 추가 대화상자 */}
       <CommentAddDialog state={commentAddDialogState} />
-
       {/* 댓글 수정 대화상자 */}
       <CommentEditDialog state={commentEditDialogState} />
 
@@ -138,7 +72,6 @@ const PostsManager = () => {
           />
         )}
       />
-
       {/* 사용자 모달 */}
       <UserDialog state={userDialogState} />
     </Card>
