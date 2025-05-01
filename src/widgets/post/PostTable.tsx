@@ -25,23 +25,23 @@ interface Props {
   onUserClick: (user: User) => void;
   onPostDetail: (post: Post) => void;
   onPostAddDialogOpen: () => void;
-  selectedTag: string;
-  setSelectedTag: (tag: string) => void;
 }
 
 export default function PostTable({
   onUserClick,
   onPostDetail,
   onPostAddDialogOpen,
-  selectedTag,
-  setSelectedTag,
 }: Props) {
   const { posts, deletePost } = usePostsStoreSelector(['posts', 'deletePost']);
   const setSelectedPost = useSelectedPostStore(
     (state) => state.setSelectedPost,
   );
   const { mutateAsync: mutatePostDelete } = useDeletePost();
-  // TODO: const { selectedTag, setSelectedTag } = useSelectedTagsStore(); 형태로 Tag 관리하기
+  const {
+    tag: selectedTag,
+    search: searchQuery,
+    updateParams,
+  } = useUrlParams();
 
   // 게시물 삭제
   const handleDeletePost = async (id: number) => {
@@ -54,6 +54,11 @@ export default function PostTable({
     } catch (error) {
       console.error('게시물 삭제 오류:', error);
     }
+  };
+
+  // 태그 선택
+  const handleSelectTag = (tag: string) => {
+    updateParams({ tag });
   };
 
   return (
@@ -86,8 +91,7 @@ export default function PostTable({
                           : 'text-blue-800 bg-blue-100 hover:bg-blue-200'
                       }`}
                       onClick={() => {
-                        setSelectedTag(tag);
-                        updateURL();
+                        handleSelectTag(tag);
                       }}
                     >
                       {tag}

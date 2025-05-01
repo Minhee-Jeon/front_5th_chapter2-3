@@ -4,7 +4,6 @@ import type {
   Post,
   Comment,
   User,
-  Tag,
   PostsResponse,
   UsersResponse,
 } from '../types';
@@ -12,6 +11,7 @@ import { useUrlParams } from '../lib/posts/useUrlParams';
 import { usePostsStoreSelector } from '../stores/posts/usePostsStore';
 import { useQueryPosts } from '../api/posts/usePostsQueries';
 import { useQueryUsers } from '../api/users/useUsersQueries';
+import { useTagsQuery } from '../api/tags/useTagsQueries';
 import { get, post, put, patch, remove } from '../shared/api/fetchBased';
 import {
   Button,
@@ -55,7 +55,6 @@ const PostsManager = () => {
   const [total, setTotal] = useState(0);
   const { selectedPost, setSelectedPost } = useSelectedPostStore();
   const [loading, setLoading] = useState(false);
-  const [tags, setTags] = useState<Tag[]>([]);
   const [comments, setComments] = useState<{ [postId: number]: Comment[] }>({});
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
   const [newComment, setNewComment] = useState<
@@ -74,18 +73,22 @@ const PostsManager = () => {
   const { dialog: postUpdateDialogState } = usePostUpdateDialog();
   const userDialogState = useUserDialog();
 
-  // post 관련 hook
+  // post 데이터 가져오기
   const {
     data: postsData,
     isLoading: postsLoading,
     error: postsError,
-  } = useQueryPosts(limit, skip);
+  } = useQueryPosts({ limit, skip });
 
+  // user 데이터 가져오기
   const {
     data: usersData,
     isLoading: usersLoading,
     error: usersError,
   } = useQueryUsers();
+
+  // 태그 데이터 가져오기
+  const { data: tags } = useTagsQuery();
 
   // 게시물 가져오기
   const fetchPosts = () => {
@@ -108,16 +111,6 @@ const PostsManager = () => {
     })) as Post[];
     setPosts(postsWithUsers);
     setTotal(postsData.total);
-  };
-
-  // 태그 가져오기
-  const fetchTags = async () => {
-    try {
-      const data = await get('/api/posts/tags');
-      setTags(data);
-    } catch (error) {
-      console.error('태그 가져오기 오류:', error);
-    }
   };
 
   // 게시물 검색
@@ -252,10 +245,6 @@ const PostsManager = () => {
   };
 
   useEffect(() => {
-    fetchTags();
-  }, []);
-
-  useEffect(() => {
     if (selectedTag) {
       fetchPostsByTag(selectedTag);
     } else {
@@ -377,7 +366,7 @@ const PostsManager = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">모든 태그</SelectItem>
-                {tags.map((tag) => (
+                {tags?.map((tag) => (
                   <SelectItem key={tag.url} value={tag.slug}>
                     {tag.slug}
                   </SelectItem>
@@ -418,13 +407,10 @@ const PostsManager = () => {
           {loading ? (
             <div className="flex justify-center p-4">로딩 중...</div>
           ) : (
-            // TODO: setSelectedTag 의존성 fix
             <PostTable
               onUserClick={userDialogState.onOpenUserDialog}
               onPostDetail={openPostDetail}
               onPostAddDialogOpen={postAddDialogState.open}
-              selectedTag={selectedTag}
-              setSelectedTag={setSelectedTag}
             />
           )}
 
