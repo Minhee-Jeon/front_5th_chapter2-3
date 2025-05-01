@@ -1,23 +1,24 @@
 import { get, post, put, patch, remove } from '../../shared/api/fetchBased';
+import { getMswUrl } from '../../shared/constants/mswUrl';
 import type { Comment } from '../../types';
 
 const fetchComments = async (postId: number): Promise<Comment[]> => {
-  const url = `/api/comments/post/${postId}`;
+  const url = `${getMswUrl}/comments/post/${postId}`;
   return get(url);
 };
 
 const createComment = async (data: Comment): Promise<Comment> => {
-  const url = '/api/comments/add';
+  const url = `${getMswUrl}/comments/add`;
   return post(url, data);
 };
 
 const updateComment = async (comment: Partial<Comment>): Promise<Comment> => {
-  const url = `/api/comments/${comment.id}`;
+  const url = `${getMswUrl}/comments/${comment.id}`;
   return put(url, { body: comment.body });
 };
 
 const deleteComment = async (id: number): Promise<void> => {
-  const url = `/api/comments/${id}`;
+  const url = `${getMswUrl}/comments/${id}`;
   return remove(url);
 };
 
@@ -26,7 +27,7 @@ const likeComment = async (
   value: number,
   type: 'likes' | 'dislikes' = 'likes',
 ): Promise<Comment> => {
-  const url = `/api/comments/${id}`;
+  const url = `${getMswUrl}/comments/${id}`;
   return patch(url, { [type]: (value || 0) + 1 });
 };
 

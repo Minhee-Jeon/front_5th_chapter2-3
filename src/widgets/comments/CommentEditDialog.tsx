@@ -5,6 +5,7 @@ import { useCommentsStoreSelector } from '../../stores/comments/useCommentsStore
 import { useNewCommentStoreSelector } from '../../stores/comments/useNewCommentStore';
 import { put } from '../../shared/api/fetchBased';
 import { useSelectedCommentStoreSelector } from '../../stores/comments/useSelectedCommentStore';
+import { getMswUrl } from '../../shared/constants/mswUrl';
 
 interface Props {
   state: ReturnType<typeof useDialog>;
@@ -24,7 +25,7 @@ export default function CommentEditDialog({ state }: Props) {
   const handleUpdateComment = async () => {
     try {
       const data = await put(
-        `/api/comments/${selectedComment?.id}`,
+        `${getMswUrl}/comments/${selectedComment?.id}`,
         newComment,
       );
       setComments((prev) => ({

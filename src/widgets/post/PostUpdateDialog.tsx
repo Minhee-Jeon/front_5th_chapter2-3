@@ -1,11 +1,11 @@
 import { BaseDialog } from '../ui/BaseDialog';
-import type { usePostUpdateDialog } from '../../model/dialog/usePostDialog';
+import type { useDialog } from '../../model/dialog/useDialog';
 import { useUpdatePost } from '../../api/posts/usePostsMutations';
 import { useSelectedPostStore } from '../../stores/posts/useSelectedPostStore';
 import { Button, Input, Textarea } from '../../shared/ui';
 
 interface Props {
-  state: ReturnType<typeof usePostUpdateDialog>['dialog'];
+  state: ReturnType<typeof useDialog>;
 }
 /**
  * 게시물 수정 다이얼로그

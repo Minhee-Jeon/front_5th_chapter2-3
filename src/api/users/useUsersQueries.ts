@@ -4,10 +4,11 @@ import { User, UsersResponse } from '../../types/User';
 import { get } from '../../shared/api/fetchBased';
 
 import { usersQueryKeys } from '../../config/users/userQueryKeys';
+import { getMswUrl } from '../../shared/constants/mswUrl';
 
 export const useQueryUsers = () => {
   const { queryKey } = usersQueryKeys.list;
-  const queryFn = () => get('/api/users?limit=0&select=username,image');
+  const queryFn = () => get(`${getMswUrl}/users?limit=0&select=username,image`);
 
   return useQuery<UsersResponse>({ queryKey, queryFn } as UseQueryOptions<
     UsersResponse,

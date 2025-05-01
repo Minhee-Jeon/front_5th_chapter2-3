@@ -1,5 +1,6 @@
 import { useDialog } from '../../model/dialog/useDialog';
 import { post } from '../../shared/api/fetchBased';
+import { getMswUrl } from '../../shared/constants/mswUrl';
 import { Button, Textarea } from '../../shared/ui';
 import { useCommentsStoreSelector } from '../../stores/comments/useCommentsStore';
 import { useNewCommentStoreSelector } from '../../stores/comments/useNewCommentStore';
@@ -22,7 +23,7 @@ export default function CommentAddDialog({ state }: Props) {
 
   const handleAddComment = async () => {
     try {
-      const data = await post('/api/comments/add', newComment);
+      const data = await post(`${getMswUrl}/comments/add`, newComment);
       setComments((prev) => ({
         ...prev,
         [data.postId]: [...(prev[data.postId] || []), data],

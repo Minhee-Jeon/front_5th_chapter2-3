@@ -6,14 +6,15 @@ import type {
 } from '../../types';
 import { PostsUrlParams } from '../../lib/posts/PostUrlParams';
 import { get, post, put, remove } from '../../shared/api/fetchBased';
+import { getMswUrl } from '../../shared/constants/mswUrl';
 
 const getPosts = async (params: string): Promise<PostsResponse> => {
-  const url = `/api/posts?${params}`;
+  const url = `${getMswUrl}/posts?${params}`;
   return get(url);
 };
 
 const getPostById = async (id: number) => {
-  const url = `/api/posts/${id}`;
+  const url = `${getMswUrl}/posts/${id}`;
   return get(url);
 };
 
@@ -23,8 +24,8 @@ const getPostsWithUsers = async (params: PostsUrlParams): Promise<Post[]> => {
   ).toString();
 
   const [postsResponse, usersResponse] = await Promise.all([
-    get(`/api/posts?${stringifiedParams}`),
-    get('/api/users?limit=0&select=username,image'),
+    get(`${getMswUrl}/posts?${stringifiedParams}`),
+    get(`${getMswUrl}/users?limit=0&select=username,image`),
   ]);
 
   const { posts }: PostsResponse = await postsResponse;
@@ -37,17 +38,17 @@ const getPostsWithUsers = async (params: PostsUrlParams): Promise<Post[]> => {
 };
 
 const addPost = async (data: Pick<Post, 'title' | 'body' | 'userId'>) => {
-  const url = '/api/posts/add';
+  const url = `${getMswUrl}/posts/add`;
   return post(url, data);
 };
 
 const updatePost = async (post: Post | null) => {
-  const url = `/api/posts/${post?.id}`;
+  const url = `${getMswUrl}/posts/${post?.id}`;
   return put(url, post);
 };
 
 const deletePost = async (id: number) => {
-  const url = `/api/posts/${id}`;
+  const url = `${getMswUrl}/posts/${id}`;
   return remove(url);
 };
 

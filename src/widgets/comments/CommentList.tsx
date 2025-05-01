@@ -8,6 +8,7 @@ import { useNewCommentStoreSelector } from '../../stores/comments/useNewCommentS
 
 import CommentAdd from './ComentAdd';
 import CommentItem from './CommentItem';
+import { getMswUrl } from '../../shared/constants/mswUrl';
 
 interface Props {
   postId: number;
@@ -42,7 +43,7 @@ export const CommentList = ({
   // 댓글 삭제
   const deleteComment = async (id: number, postId: number) => {
     try {
-      await remove(`/api/comments/${id}`);
+      await remove(`${getMswUrl}/comments/${id}`);
       setComments((prev) => ({
         ...prev,
         [postId]: prev[postId].filter((comment) => comment.id !== id),
@@ -58,7 +59,7 @@ export const CommentList = ({
       const comment = comments[postId]?.find((c) => c.id === id);
       if (!comment) return;
 
-      const data = await patch(`/api/comments/${id}`, {
+      const data = await patch(`${getMswUrl}/comments/${id}`, {
         likes: (comment.likes || 0) + 1,
       });
       setComments((prev) => ({
