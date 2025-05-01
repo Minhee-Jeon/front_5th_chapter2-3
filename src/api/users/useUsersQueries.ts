@@ -1,6 +1,6 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 
-import { UsersResponse } from '../../types/User';
+import { User, UsersResponse } from '../../types/User';
 import { get } from '../../shared/api/fetchBased';
 
 import { usersQueryKeys } from '../../config/users/userQueryKeys';
@@ -13,4 +13,11 @@ export const useQueryUsers = () => {
     UsersResponse,
     Error
   >);
+};
+
+export const useQueryUser = (id: number) => {
+  const { queryKey } = usersQueryKeys.detail(id);
+  const queryFn = () => get(`/api/users/${id}`);
+
+  return useQuery<User>({ queryKey, queryFn });
 };

@@ -1,17 +1,14 @@
 import type { User } from '../../types';
-import { useSelectedUserStore } from '../../stores/users/useSelectedUserStore';
-import { get } from '../../shared/api/fetchBased';
-
+import { useSelectedUserMutation } from '../../api/users/useUsersMutations';
 import { useDialog } from './useDialog';
 
 export const useUserDialog = () => {
   const dialog = useDialog();
-  const { selectedUser, setSelectedUser } = useSelectedUserStore();
+  const { selectedUser, setSelectedUser } = useSelectedUserMutation();
 
   const onOpenUserDialog = async (user: User) => {
     try {
-      const userData = await get(`/api/users/${user.id}`);
-      setSelectedUser(userData);
+      setSelectedUser(user.id);
       dialog.open();
     } catch (error) {
       console.error('사용자 정보 가져오기 오류:', error);
