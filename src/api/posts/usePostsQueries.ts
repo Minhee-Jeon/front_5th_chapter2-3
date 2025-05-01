@@ -35,3 +35,9 @@ export const useQueryPostById = (id: number) =>
     // id가 존재할 때에만 요청 보내기
     enabled: Boolean(id),
   });
+
+export const useQueryPostsWithUsers = (params: PostsUrlParams) =>
+  useQuery<Post[]>({
+    queryKey: postsQueryKeys.listWithUsers(params).queryKey,
+    queryFn: async () => postsApi.getPostsWithUsers(params),
+  });

@@ -23,14 +23,14 @@ import { HighlightedText } from '../../shared/ui/HighlightedText';
 
 interface Props {
   onUserClick: (user: User) => void;
+  onPostUpdateDialogOpen: () => void;
   onPostDetail: (post: Post) => void;
-  onPostAddDialogOpen: () => void;
 }
 
 export default function PostTable({
   onUserClick,
+  onPostUpdateDialogOpen,
   onPostDetail,
-  onPostAddDialogOpen,
 }: Props) {
   const { posts, deletePost } = usePostsStoreSelector(['posts', 'deletePost']);
   const setSelectedPost = useSelectedPostStore(
@@ -136,7 +136,7 @@ export default function PostTable({
                   size="sm"
                   onClick={() => {
                     setSelectedPost(post);
-                    onPostAddDialogOpen();
+                    onPostUpdateDialogOpen();
                   }}
                 >
                   <Edit2 className="w-4 h-4" />

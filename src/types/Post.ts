@@ -1,12 +1,12 @@
 import { ApiResponseList } from '../shared/api/ApiResponseList';
-import { User } from './User';
+import { UserResponse } from './User';
 
 export interface Post {
   id: number;
   title: string;
   body: string;
   userId: number;
-  author?: User;
+  author?: UserResponse;
   tags?: string[];
   reactions?: {
     likes: number;

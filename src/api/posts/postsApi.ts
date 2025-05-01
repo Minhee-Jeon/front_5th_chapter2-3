@@ -1,4 +1,10 @@
-import type { Post, PostsResponse } from '../../types';
+import type {
+  Post,
+  PostsResponse,
+  UserResponse,
+  UsersResponse,
+} from '../../types';
+import { PostsUrlParams } from '../../lib/posts/PostUrlParams';
 import { get, post, put, remove } from '../../shared/api/fetchBased';
 
 const getPosts = async (params: string): Promise<PostsResponse> => {
@@ -9,6 +15,25 @@ const getPosts = async (params: string): Promise<PostsResponse> => {
 const getPostById = async (id: number) => {
   const url = `/api/posts/${id}`;
   return get(url);
+};
+
+const getPostsWithUsers = async (params: PostsUrlParams): Promise<Post[]> => {
+  const stringifiedParams = new URLSearchParams(
+    Object.entries(params).map(([key, value]) => [key, String(value)]),
+  ).toString();
+
+  const [postsResponse, usersResponse] = await Promise.all([
+    get(`/api/posts?${stringifiedParams}`),
+    get('/api/users?limit=0&select=username,image'),
+  ]);
+
+  const { posts }: PostsResponse = await postsResponse;
+  const { users }: UsersResponse = await usersResponse;
+
+  return posts.map((post) => ({
+    ...post,
+    author: users.find((user) => user.id === post.userId) as UserResponse,
+  }));
 };
 
 const addPost = async (data: Pick<Post, 'title' | 'body' | 'userId'>) => {
@@ -29,6 +54,7 @@ const deletePost = async (id: number) => {
 export const postsApi = {
   getPosts,
   getPostById,
+  getPostsWithUsers,
   addPost,
   updatePost,
   deletePost,

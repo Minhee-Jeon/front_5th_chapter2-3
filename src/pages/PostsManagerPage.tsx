@@ -1,17 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Edit2, Plus, Search, ThumbsUp, Trash2 } from 'lucide-react';
-import type {
-  Post,
-  Comment,
-  User,
-  PostsResponse,
-  UsersResponse,
-} from '../types';
+import { useState } from 'react';
+import { Edit2, Plus, ThumbsUp, Trash2 } from 'lucide-react';
+import type { Post, Comment, User } from '../types';
 import { useUrlParams } from '../lib/posts/useUrlParams';
-import { usePostsStoreSelector } from '../stores/posts/usePostsStore';
 import { useQueryPosts } from '../api/posts/usePostsQueries';
-import { useQueryUsers } from '../api/users/useUsersQueries';
-import { useTagsQuery } from '../api/tags/useTagsQueries';
 import { get, post, put, patch, remove } from '../shared/api/fetchBased';
 import {
   Button,
@@ -19,7 +10,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  Input,
   Select,
   SelectContent,
   SelectItem,
@@ -38,6 +28,7 @@ import PostAddDialog from '../widgets/post/PostAddDialog';
 import PostUpdateDialog from '../widgets/post/PostUpdateDialog';
 import UserDialog from '../widgets/UserDialog';
 import PostTable from '../widgets/post/PostTable';
+import PostSearchFilter from '../widgets/post/PostSearchFilter';
 
 const PostsManager = () => {
   const {
@@ -45,16 +36,11 @@ const PostsManager = () => {
     limit,
     search: searchQuery,
     tag: selectedTag,
-    sortBy,
-    sortOrder,
     updateParams,
   } = useUrlParams();
 
   // 상태 관리
-  const { setPosts } = usePostsStoreSelector(['setPosts']);
-  const [total, setTotal] = useState(0);
   const { selectedPost, setSelectedPost } = useSelectedPostStore();
-  const [loading, setLoading] = useState(false);
   const [comments, setComments] = useState<{ [postId: number]: Comment[] }>({});
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
   const [newComment, setNewComment] = useState<
@@ -74,89 +60,20 @@ const PostsManager = () => {
   const userDialogState = useUserDialog();
 
   // post 데이터 가져오기
-  const {
-    data: postsData,
-    isLoading: postsLoading,
-    error: postsError,
-  } = useQueryPosts({ limit, skip });
+  const { data: postsData, isLoading: loading } = useQueryPosts({
+    limit,
+    skip,
+    search: searchQuery,
+    tag: selectedTag,
+  });
 
-  // user 데이터 가져오기
-  const {
-    data: usersData,
-    isLoading: usersLoading,
-    error: usersError,
-  } = useQueryUsers();
+  // const setPosts = usePostsStore((state) => state.setPosts);
 
-  // 태그 데이터 가져오기
-  const { data: tags } = useTagsQuery();
-
-  // 게시물 가져오기
-  const fetchPosts = () => {
-    setLoading(true);
-
-    if (postsLoading || usersLoading) return;
-    if (postsError) {
-      console.error('게시물 가져오기 오류: ', postsError);
-      return;
-    }
-    if (usersError) {
-      console.error('사용자 정보 가져오기 오류: ', postsError);
-      return;
-    }
-    if (!postsData || !usersData) return;
-
-    const postsWithUsers = postsData.posts.map((post) => ({
-      ...post,
-      author: usersData.users.find((user) => user.id === post.userId),
-    })) as Post[];
-    setPosts(postsWithUsers);
-    setTotal(postsData.total);
-  };
-
-  // 게시물 검색
-  const searchPosts = async () => {
-    if (!searchQuery) {
-      fetchPosts();
-      return;
-    }
-    setLoading(true);
-    try {
-      const data = await get(`/api/posts/search?q=${searchQuery}`);
-      setPosts(data.posts);
-      setTotal(data.total);
-    } catch (error) {
-      console.error('게시물 검색 오류:', error);
-    }
-    setLoading(false);
-  };
-
-  // 태그별 게시물 가져오기
-  const fetchPostsByTag = async (tag: string) => {
-    if (!tag || tag === 'all') {
-      fetchPosts();
-      return;
-    }
-    setLoading(true);
-    try {
-      const [postsResponse, usersResponse] = await Promise.all([
-        get(`/api/posts/tag/${tag}`),
-        get('/api/users?limit=0&select=username,image'),
-      ]);
-      const postsData: PostsResponse = await postsResponse;
-      const usersData: UsersResponse = await usersResponse;
-
-      const postsWithUsers = postsData.posts.map((post) => ({
-        ...post,
-        author: usersData.users.find((user) => user.id === post.userId),
-      }));
-
-      setPosts(postsWithUsers);
-      setTotal(postsData.total);
-    } catch (error) {
-      console.error('태그별 게시물 가져오기 오류:', error);
-    }
-    setLoading(false);
-  };
+  // useEffect(() => {
+  //   if (postsData?.posts) {
+  //     setPosts(postsData.posts);
+  //   }
+  // }, [postsData, setPosts]);
 
   // 댓글 가져오기
   const fetchComments = async (postId: number) => {
@@ -244,26 +161,6 @@ const PostsManager = () => {
     setShowPostDetailDialog(true);
   };
 
-  useEffect(() => {
-    if (selectedTag) {
-      fetchPostsByTag(selectedTag);
-    } else {
-      fetchPosts();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (postsData && usersData) {
-      setTotal(postsData.total);
-      const postsWithUsers = postsData.posts.map((post) => ({
-        ...post,
-        author: usersData?.users?.find((user) => user.id === post.userId),
-      }));
-      setPosts(postsWithUsers);
-      setLoading(false);
-    }
-  }, [postsData, usersData, setPosts]);
-
   // 댓글 렌더링
   const renderComments = (postId: number) => (
     <div className="mt-2">
@@ -341,67 +238,7 @@ const PostsManager = () => {
       <CardContent>
         <div className="flex flex-col gap-4">
           {/* 검색 및 필터 컨트롤 */}
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="게시물 검색..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={(e) => updateParams({ search: e.target.value })}
-                  onKeyPress={(e) => e.key === 'Enter' && searchPosts()}
-                />
-              </div>
-            </div>
-            <Select
-              value={selectedTag}
-              onValueChange={(value) => {
-                updateParams({ tag: value });
-                fetchPostsByTag(value);
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="태그 선택" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">모든 태그</SelectItem>
-                {tags?.map((tag) => (
-                  <SelectItem key={tag.url} value={tag.slug}>
-                    {tag.slug}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={sortBy}
-              onValueChange={(value) => updateParams({ sortBy: value })}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="정렬 기준" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">없음</SelectItem>
-                <SelectItem value="id">ID</SelectItem>
-                <SelectItem value="title">제목</SelectItem>
-                <SelectItem value="reactions">반응</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={sortOrder}
-              onValueChange={(value: 'asc' | 'desc') =>
-                updateParams({ sortOrder: value })
-              }
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="정렬 순서" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="asc">오름차순</SelectItem>
-                <SelectItem value="desc">내림차순</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <PostSearchFilter />
 
           {/* 게시물 테이블 */}
           {loading ? (
@@ -410,7 +247,7 @@ const PostsManager = () => {
             <PostTable
               onUserClick={userDialogState.onOpenUserDialog}
               onPostDetail={openPostDetail}
-              onPostAddDialogOpen={postAddDialogState.open}
+              onPostUpdateDialogOpen={postUpdateDialogState.open}
             />
           )}
 
@@ -445,7 +282,7 @@ const PostsManager = () => {
                 이전
               </Button>
               <Button
-                disabled={skip + limit >= total}
+                disabled={skip + limit >= (postsData?.total ?? 0)}
                 onClick={() => updateParams({ skip: skip + limit })}
               >
                 다음
