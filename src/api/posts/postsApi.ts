@@ -1,11 +1,8 @@
 import type { Post, PostsResponse } from '../../types';
 import { get, post, put, remove } from '../../shared/api/fetchBased';
 
-const getPosts = async (
-  limit: number,
-  skip: number,
-): Promise<PostsResponse> => {
-  const url = `/api/posts?limit=${limit}&skip=${skip}`;
+const getPosts = async (params: string): Promise<PostsResponse> => {
+  const url = `/api/posts?${params}`;
   return get(url);
 };
 

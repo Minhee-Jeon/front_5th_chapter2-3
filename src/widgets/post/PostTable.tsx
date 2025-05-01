@@ -1,5 +1,5 @@
 import { useDeletePost } from '../../api/posts/usePostsMutations';
-import { HighlightedText } from '../../shared/ui/HighlightedText';
+import { useUrlParams } from '../../lib/posts/useUrlParams';
 import { usePostsStoreSelector } from '../../stores/posts/usePostsStore';
 import { useSelectedPostStore } from '../../stores/posts/useSelectedPostStore';
 import { Post, User } from '../../types';
@@ -19,10 +19,9 @@ import {
   TableHeader,
   TableRow,
 } from '../../shared/ui';
+import { HighlightedText } from '../../shared/ui/HighlightedText';
 
 interface Props {
-  searchQuery: string;
-  updateURL: () => void;
   onUserClick: (user: User) => void;
   onPostDetail: (post: Post) => void;
   onPostAddDialogOpen: () => void;
@@ -31,8 +30,6 @@ interface Props {
 }
 
 export default function PostTable({
-  searchQuery,
-  updateURL,
   onUserClick,
   onPostDetail,
   onPostAddDialogOpen,
@@ -40,10 +37,10 @@ export default function PostTable({
   setSelectedTag,
 }: Props) {
   const { posts, deletePost } = usePostsStoreSelector(['posts', 'deletePost']);
-  const { mutateAsync: mutatePostDelete } = useDeletePost();
   const setSelectedPost = useSelectedPostStore(
     (state) => state.setSelectedPost,
   );
+  const { mutateAsync: mutatePostDelete } = useDeletePost();
   // TODO: const { selectedTag, setSelectedTag } = useSelectedTagsStore(); 형태로 Tag 관리하기
 
   // 게시물 삭제

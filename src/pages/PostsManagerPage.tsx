@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Edit2, Plus, Search, ThumbsUp, Trash2 } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import type {
   Post,
   Comment,
@@ -9,6 +8,7 @@ import type {
   PostsResponse,
   UsersResponse,
 } from '../types';
+import { useUrlParams } from '../lib/posts/useUrlParams';
 import { usePostsStoreSelector } from '../stores/posts/usePostsStore';
 import { useQueryPosts } from '../api/posts/usePostsQueries';
 import { useQueryUsers } from '../api/users/useUsersQueries';
@@ -40,28 +40,22 @@ import UserDialog from '../widgets/UserDialog';
 import PostTable from '../widgets/post/PostTable';
 
 const PostsManager = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
+  const {
+    skip,
+    limit,
+    search: searchQuery,
+    tag: selectedTag,
+    sortBy,
+    sortOrder,
+    updateParams,
+  } = useUrlParams();
 
   // 상태 관리
   const { setPosts } = usePostsStoreSelector(['setPosts']);
   const [total, setTotal] = useState(0);
-  const [skip, setSkip] = useState(parseInt(queryParams.get('skip') || '0'));
-  const [limit, setLimit] = useState(
-    parseInt(queryParams.get('limit') || '10'),
-  );
-  const [searchQuery, setSearchQuery] = useState(
-    queryParams.get('search') || '',
-  );
   const { selectedPost, setSelectedPost } = useSelectedPostStore();
-  const [sortBy, setSortBy] = useState(queryParams.get('sortBy') || '');
-  const [sortOrder, setSortOrder] = useState(
-    queryParams.get('sortOrder') || 'asc',
-  );
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
-  const [selectedTag, setSelectedTag] = useState(queryParams.get('tag') || '');
   const [comments, setComments] = useState<{ [postId: number]: Comment[] }>({});
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
   const [newComment, setNewComment] = useState<
@@ -71,6 +65,7 @@ const PostsManager = () => {
     postId: undefined,
     userId: 1,
   });
+
   const [showAddCommentDialog, setShowAddCommentDialog] = useState(false);
   const [showEditCommentDialog, setShowEditCommentDialog] = useState(false);
   const [showPostDetailDialog, setShowPostDetailDialog] = useState(false);
@@ -91,18 +86,6 @@ const PostsManager = () => {
     isLoading: usersLoading,
     error: usersError,
   } = useQueryUsers();
-
-  // URL 업데이트 함수
-  const updateURL = () => {
-    const params = new URLSearchParams();
-    if (skip) params.set('skip', skip.toString());
-    if (limit) params.set('limit', limit.toString());
-    if (searchQuery) params.set('search', searchQuery);
-    if (sortBy) params.set('sortBy', sortBy);
-    if (sortOrder) params.set('sortOrder', sortOrder);
-    if (selectedTag) params.set('tag', selectedTag);
-    navigate(`?${params.toString()}`);
-  };
 
   // 게시물 가져오기
   const fetchPosts = () => {
@@ -278,18 +261,7 @@ const PostsManager = () => {
     } else {
       fetchPosts();
     }
-    updateURL();
-  }, [skip, limit, sortBy, sortOrder, selectedTag]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    setSkip(parseInt(params.get('skip') || '0'));
-    setLimit(parseInt(params.get('limit') || '10'));
-    setSearchQuery(params.get('search') || '');
-    setSortBy(params.get('sortBy') || '');
-    setSortOrder(params.get('sortOrder') || 'asc');
-    setSelectedTag(params.get('tag') || '');
-  }, [location.search]);
+  }, []);
 
   useEffect(() => {
     if (postsData && usersData) {
@@ -388,7 +360,7 @@ const PostsManager = () => {
                   placeholder="게시물 검색..."
                   className="pl-8"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => updateParams({ search: e.target.value })}
                   onKeyPress={(e) => e.key === 'Enter' && searchPosts()}
                 />
               </div>
@@ -396,9 +368,8 @@ const PostsManager = () => {
             <Select
               value={selectedTag}
               onValueChange={(value) => {
-                setSelectedTag(value);
+                updateParams({ tag: value });
                 fetchPostsByTag(value);
-                updateURL();
               }}
             >
               <SelectTrigger className="w-[180px]">
@@ -413,7 +384,10 @@ const PostsManager = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={sortBy} onValueChange={setSortBy}>
+            <Select
+              value={sortBy}
+              onValueChange={(value) => updateParams({ sortBy: value })}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="정렬 기준" />
               </SelectTrigger>
@@ -424,7 +398,12 @@ const PostsManager = () => {
                 <SelectItem value="reactions">반응</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={sortOrder} onValueChange={setSortOrder}>
+            <Select
+              value={sortOrder}
+              onValueChange={(value: 'asc' | 'desc') =>
+                updateParams({ sortOrder: value })
+              }
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="정렬 순서" />
               </SelectTrigger>
@@ -439,9 +418,8 @@ const PostsManager = () => {
           {loading ? (
             <div className="flex justify-center p-4">로딩 중...</div>
           ) : (
+            // TODO: setSelectedTag 의존성 fix
             <PostTable
-              searchQuery={searchQuery}
-              updateURL={updateURL}
               onUserClick={userDialogState.onOpenUserDialog}
               onPostDetail={openPostDetail}
               onPostAddDialogOpen={postAddDialogState.open}
@@ -456,7 +434,9 @@ const PostsManager = () => {
               <span>표시</span>
               <Select
                 value={limit.toString()}
-                onValueChange={(value) => setLimit(Number(value))}
+                onValueChange={(value) =>
+                  updateParams({ limit: Number(value) })
+                }
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="10" />
@@ -472,13 +452,15 @@ const PostsManager = () => {
             <div className="flex gap-2">
               <Button
                 disabled={skip === 0}
-                onClick={() => setSkip(Math.max(0, skip - limit))}
+                onClick={() =>
+                  updateParams({ skip: Math.max(0, skip - limit) })
+                }
               >
                 이전
               </Button>
               <Button
                 disabled={skip + limit >= total}
-                onClick={() => setSkip(skip + limit)}
+                onClick={() => updateParams({ skip: skip + limit })}
               >
                 다음
               </Button>
