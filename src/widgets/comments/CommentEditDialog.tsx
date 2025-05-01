@@ -1,10 +1,10 @@
 import { Button, Textarea } from '../../shared/ui';
 import { BaseDialog } from '../ui/BaseDialog';
-import { useDialog } from '../../model/dialog/useDialog';
-import { useCommentsStoreSelector } from '../../stores/comments/useCommentsStore';
-import { useNewCommentStoreSelector } from '../../stores/comments/useNewCommentStore';
+import { useDialog } from '../../features/dialog/model/useDialog';
+import { useCommentsStoreSelector } from '../../features/comments/model/useCommentsStore';
+import { useNewCommentStoreSelector } from '../../features/comments/model/useNewCommentStore';
 import { put } from '../../shared/api/fetchBased';
-import { useSelectedCommentStoreSelector } from '../../stores/comments/useSelectedCommentStore';
+import { useSelectedCommentStoreSelector } from '../../features/comments/model/useSelectedCommentStore';
 import { getMswUrl } from '../../shared/constants/mswUrl';
 
 interface Props {

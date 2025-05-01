@@ -1,8 +1,8 @@
 import { BaseDialog } from '../ui/BaseDialog';
-import type { useDialog } from '../../model/dialog/useDialog';
-import { usePostsStoreSelector } from '../../stores/posts/usePostsStore';
+import type { useDialog } from '../../features/dialog/model/useDialog';
+import { usePostsStoreSelector } from '../../features/posts/model/usePostsStore';
 import { useAddPost } from '../../api/posts/usePostsMutations';
-import { useNewPost } from '../../model/posts/useNewPost';
+import { useNewPost } from '../../features/posts/model/useNewPost';
 import { Button, Input, Textarea } from '../../shared/ui';
 
 interface Props {

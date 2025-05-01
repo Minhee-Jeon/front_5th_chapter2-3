@@ -1,7 +1,7 @@
 import { useUrlParams } from '../../lib/posts/useUrlParams';
-import { useDialog } from '../../model/dialog/useDialog';
+import { useDialog } from '../../features/dialog/model/useDialog';
 import { HighlightedText } from '../../shared/ui/HighlightedText';
-import { useSelectedPostStore } from '../../stores/posts/useSelectedPostStore';
+import { useSelectedPostStore } from '../../features/posts/model/useSelectedPostStore';
 import { BaseDialog } from '../ui/BaseDialog';
 
 interface Props {

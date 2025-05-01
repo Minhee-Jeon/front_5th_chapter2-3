@@ -1,8 +1,8 @@
 import { useDeletePost } from '../../api/posts/usePostsMutations';
 import { useUrlParams } from '../../lib/posts/useUrlParams';
-import { useQueryPostsWithUsers } from '../../api/posts/usePostsQueries';
-import { useSelectedPostStoreSelector } from '../../stores/posts/useSelectedPostStore';
-import { useCommentsStoreSelector } from '../../stores/comments/useCommentsStore';
+import { useQueryPostsWithUsers } from '../../features/posts/api/usePostsQueries';
+import { useSelectedPostStoreSelector } from '../../features/posts/model/useSelectedPostStore';
+import { useCommentsStoreSelector } from '../../features/comments/model/useCommentsStore';
 import { Post } from '../../entities/posts/model/Post';
 import { User } from '../../types';
 import {

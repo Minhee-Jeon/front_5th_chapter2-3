@@ -1,9 +1,9 @@
-import { useDialog } from '../../model/dialog/useDialog';
+import { useDialog } from '../../features/dialog/model/useDialog';
 import { post } from '../../shared/api/fetchBased';
 import { getMswUrl } from '../../shared/constants/mswUrl';
 import { Button, Textarea } from '../../shared/ui';
-import { useCommentsStoreSelector } from '../../stores/comments/useCommentsStore';
-import { useNewCommentStoreSelector } from '../../stores/comments/useNewCommentStore';
+import { useCommentsStoreSelector } from '../../features/comments/model/useCommentsStore';
+import { useNewCommentStoreSelector } from '../../features/comments/model/useNewCommentStore';
 import { BaseDialog } from '../ui/BaseDialog';
 
 interface Props {

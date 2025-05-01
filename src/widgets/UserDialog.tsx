@@ -1,5 +1,5 @@
 import { BaseDialog } from './ui/BaseDialog';
-import type { useUserDialog } from '../model/dialog/useUserDialog';
+import type { useUserDialog } from '../features/dialog/model/useUserDialog';
 
 interface Props {
   state: ReturnType<typeof useUserDialog>;

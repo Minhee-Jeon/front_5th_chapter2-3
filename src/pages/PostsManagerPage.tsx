@@ -1,18 +1,18 @@
 import { Plus } from 'lucide-react';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '../shared/ui';
 
-import { useDialog } from '../model/dialog/useDialog';
-import { useUserDialog } from '../model/dialog/useUserDialog';
+import { useDialog } from '../features/dialog/model/useDialog';
+import { useUserDialog } from '../features/dialog/model/useUserDialog';
 
 import PostAddDialog from '../widgets/post/PostAddDialog';
 import PostUpdateDialog from '../widgets/post/PostUpdateDialog';
 import UserDialog from '../widgets/UserDialog';
 import PostTable from '../widgets/post/PostTable';
-import PostSearchFilter from '../widgets/post/PostSearchFilter';
+import PostSearchFilter from '../features/posts/ui/PostSearchFilter';
 import PostDetailDialog from '../widgets/post/PostDetailDialog';
-import PostPagination from '../widgets/post/PostPagination';
+import PostPagination from '../features/posts/ui/PostPagination';
 import CommentAddDialog from '../widgets/comments/CommentAddDialog';
-import { CommentList } from '../widgets/comments/CommentList';
+import { CommentList } from '../features/comments/ui/CommentList';
 import CommentEditDialog from '../widgets/comments/CommentEditDialog';
 
 const PostsManager = () => {
