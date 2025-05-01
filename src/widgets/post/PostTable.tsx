@@ -1,7 +1,8 @@
 import { useDeletePost } from '../../api/posts/usePostsMutations';
 import { useUrlParams } from '../../lib/posts/useUrlParams';
 import { useQueryPostsWithUsers } from '../../api/posts/usePostsQueries';
-import { useSelectedPostStore } from '../../stores/posts/useSelectedPostStore';
+import { useSelectedPostStoreSelector } from '../../stores/posts/useSelectedPostStore';
+import { useCommentsStoreSelector } from '../../stores/comments/useCommentsStore';
 import { Post, User } from '../../types';
 import {
   Edit2,
@@ -24,19 +25,18 @@ import { HighlightedText } from '../../shared/ui/HighlightedText';
 interface Props {
   onUserClick: (user: User) => void;
   onPostUpdateDialogOpen: () => void;
-  onPostDetail: (post: Post) => void;
+  onPostDetailDialogOpen: () => void;
 }
 
 export default function PostTable({
   onUserClick,
   onPostUpdateDialogOpen,
-  onPostDetail,
+  onPostDetailDialogOpen,
 }: Props) {
+  const { setSelectedPost } = useSelectedPostStoreSelector(['setSelectedPost']);
+  const { getComments } = useCommentsStoreSelector(['getComments']);
   const { updateParams, ...params } = useUrlParams();
-  const { data: posts } = useQueryPostsWithUsers({ ...params });
-  const setSelectedPost = useSelectedPostStore(
-    (state) => state.setSelectedPost,
-  );
+  const { data: posts, isLoading } = useQueryPostsWithUsers({ ...params });
   const { mutateAsync: mutatePostDelete } = useDeletePost();
 
   // 게시물 삭제
@@ -48,10 +48,21 @@ export default function PostTable({
     }
   };
 
+  // 게시물 상세 보기
+  const handleOpenPostDetail = (post: Post) => {
+    setSelectedPost(post);
+    getComments(post.id);
+    onPostDetailDialogOpen();
+  };
+
   // 태그 선택
   const handleSelectTag = (tag: string) => {
     updateParams({ tag });
   };
+
+  if (isLoading) {
+    return <div className="flex justify-center p-4">로딩 중...</div>;
+  }
 
   return (
     <Table>
@@ -122,7 +133,7 @@ export default function PostTable({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onPostDetail(post)}
+                  onClick={() => handleOpenPostDetail(post)}
                 >
                   <MessageSquare className="w-4 h-4" />
                 </Button>
