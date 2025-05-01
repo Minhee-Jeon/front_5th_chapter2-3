@@ -1,7 +1,6 @@
 import { BaseDialog } from '../ui/BaseDialog';
 import type { usePostUpdateDialog } from '../../model/dialog/usePostDialog';
 import { useUpdatePost } from '../../api/posts/usePostsMutations';
-import { usePostsStoreSelector } from '../../stores/posts/usePostsStore';
 import { useSelectedPostStore } from '../../stores/posts/useSelectedPostStore';
 import { Button, Input, Textarea } from '../../shared/ui';
 
@@ -14,14 +13,12 @@ interface Props {
 export default function PostUpdateDialog({ state }: Props) {
   const { selectedPost, setSelectedPost } = useSelectedPostStore();
   const { mutateAsync: mutatePostUpdate } = useUpdatePost();
-  const { updatePost } = usePostsStoreSelector(['updatePost']);
 
   // 게시물 업데이트
   const handleUpdatePost = async () => {
     try {
       await mutatePostUpdate(selectedPost!, {
-        onSuccess: (updatedPost) => {
-          updatePost(updatedPost);
+        onSuccess: () => {
           state.close();
         },
       });
