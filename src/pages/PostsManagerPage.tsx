@@ -28,10 +28,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
   Input,
   Select,
   SelectContent,
@@ -46,9 +42,12 @@ import {
   TableRow,
   Textarea,
 } from '../shared/ui';
+import { BaseDialog } from '../widgets/ui/BaseDialog';
 
 import { useSelectedPostStore } from '../stores/posts/useSelectedPostStore';
-import { useSelectedUserStore } from '../stores/users/useSelectedUserStore';
+import { usePostAddDialog } from '../model/dialog/usePostDialog';
+import { usePostUpdateDialog } from '../model/dialog/usePostDialog';
+import { useUserDialog } from '../model/dialog/useUserDialog';
 import PostAddDialog from '../widgets/post/PostAddDialog';
 import PostUpdateDialog from '../widgets/post/PostUpdateDialog';
 import UserDialog from '../widgets/UserDialog';
@@ -77,8 +76,6 @@ const PostsManager = () => {
   const [sortOrder, setSortOrder] = useState(
     queryParams.get('sortOrder') || 'asc',
   );
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const [selectedTag, setSelectedTag] = useState(queryParams.get('tag') || '');
@@ -94,10 +91,10 @@ const PostsManager = () => {
   const [showAddCommentDialog, setShowAddCommentDialog] = useState(false);
   const [showEditCommentDialog, setShowEditCommentDialog] = useState(false);
   const [showPostDetailDialog, setShowPostDetailDialog] = useState(false);
-  const [showUserModal, setShowUserModal] = useState(false);
-  const setSelectedUser = useSelectedUserStore(
-    (state) => state.setSelectedUser,
-  );
+
+  const { dialog: postAddDialogState } = usePostAddDialog();
+  const { dialog: postUpdateDialogState } = usePostUpdateDialog();
+  const userDialogState = useUserDialog();
 
   // post 관련 hook
   const {
@@ -304,17 +301,6 @@ const PostsManager = () => {
     setShowPostDetailDialog(true);
   };
 
-  // 사용자 모달 열기
-  const openUserModal = async (user: User) => {
-    try {
-      const userData = await get(`/api/users/${user.id}`);
-      setSelectedUser(userData);
-      setShowUserModal(true);
-    } catch (error) {
-      console.error('사용자 정보 가져오기 오류:', error);
-    }
-  };
-
   useEffect(() => {
     fetchTags();
   }, []);
@@ -414,7 +400,7 @@ const PostsManager = () => {
             <TableCell>
               <div
                 className="flex items-center space-x-2 cursor-pointer"
-                onClick={() => openUserModal(post.author!)}
+                onClick={() => userDialogState.onOpenUserDialog(post.author!)}
               >
                 <img
                   src={post.author?.image}
@@ -446,7 +432,7 @@ const PostsManager = () => {
                   size="sm"
                   onClick={() => {
                     setSelectedPost(post);
-                    setShowEditDialog(true);
+                    postUpdateDialogState.open();
                   }}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -534,7 +520,7 @@ const PostsManager = () => {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>게시물 관리자</span>
-          <Button onClick={() => setShowAddDialog(true)}>
+          <Button onClick={() => postAddDialogState.open()}>
             <Plus className="w-4 h-4 mr-2" />
             게시물 추가
           </Button>
@@ -643,83 +629,60 @@ const PostsManager = () => {
       </CardContent>
 
       {/* 게시물 추가 대화상자 */}
-      <PostAddDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
+      <PostAddDialog state={postAddDialogState} />
 
       {/* 게시물 수정 대화상자 */}
-      <PostUpdateDialog
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-      />
+      <PostUpdateDialog state={postUpdateDialogState} />
 
       {/* 댓글 추가 대화상자 */}
-      <Dialog
+      <BaseDialog
         open={showAddCommentDialog}
         onOpenChange={setShowAddCommentDialog}
+        title="새 댓글 추가"
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>새 댓글 추가</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              placeholder="댓글 내용"
-              value={newComment.body}
-              onChange={(e) =>
-                setNewComment({ ...newComment, body: e.target.value })
-              }
-            />
-            <Button onClick={addComment}>댓글 추가</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        <Textarea
+          placeholder="댓글 내용"
+          value={newComment.body}
+          onChange={(e) =>
+            setNewComment({ ...newComment, body: e.target.value })
+          }
+        />
+        <Button onClick={addComment}>댓글 추가</Button>
+      </BaseDialog>
 
       {/* 댓글 수정 대화상자 */}
-      <Dialog
+      <BaseDialog
         open={showEditCommentDialog}
         onOpenChange={setShowEditCommentDialog}
+        title="댓글 수정"
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>댓글 수정</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              placeholder="댓글 내용"
-              value={selectedComment?.body || ''}
-              onChange={(e) =>
-                selectedComment &&
-                setSelectedComment({ ...selectedComment, body: e.target.value })
-              }
-            />
-            <Button onClick={updateComment}>댓글 업데이트</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        <Textarea
+          placeholder="댓글 내용"
+          value={selectedComment?.body || ''}
+          onChange={(e) =>
+            selectedComment &&
+            setSelectedComment({ ...selectedComment, body: e.target.value })
+          }
+        />
+        <Button onClick={updateComment}>댓글 업데이트</Button>
+      </BaseDialog>
 
       {/* 게시물 상세 보기 대화상자 */}
-      <Dialog
+      <BaseDialog
         open={showPostDetailDialog}
         onOpenChange={setShowPostDetailDialog}
+        title={
+          selectedPost?.title && highlightText(selectedPost?.title, searchQuery)
+        }
       >
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedPost?.title &&
-                highlightText(selectedPost?.title, searchQuery)}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>
-              {selectedPost?.body &&
-                highlightText(selectedPost?.body, searchQuery)}
-            </p>
-            {selectedPost?.id ? renderComments(selectedPost?.id) : null}
-          </div>
-        </DialogContent>
-      </Dialog>
+        <p>
+          {selectedPost?.body && highlightText(selectedPost?.body, searchQuery)}
+        </p>
+        {selectedPost?.id ? renderComments(selectedPost?.id) : null}
+      </BaseDialog>
 
       {/* 사용자 모달 */}
-      <UserDialog open={showUserModal} onOpenChange={setShowUserModal} />
+      <UserDialog state={userDialogState} />
     </Card>
   );
 };
