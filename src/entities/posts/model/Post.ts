@@ -1,5 +1,4 @@
-import { ApiResponseList } from '../../../shared/api';
-import { UserResponse } from '../../../types';
+import { UserResponse } from '../../users/api/UserResponse';
 
 export interface Post {
   id: number;
@@ -13,5 +12,3 @@ export interface Post {
     dislikes: number;
   };
 }
-
-export type PostsResponse = ApiResponseList<Post, 'posts'>;

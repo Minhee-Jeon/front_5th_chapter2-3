@@ -4,7 +4,7 @@ import { getMswUrl } from '../../shared/constants/mswUrl';
 import { Button, Textarea } from '../../shared/ui';
 import { useCommentsStoreSelector } from '../../features/comments/model/useCommentsStore';
 import { useNewCommentStoreSelector } from '../../features/comments/model/useNewCommentStore';
-import { BaseDialog } from '../ui/BaseDialog';
+import { BaseDialog } from '../../features/dialog/ui/BaseDialog';
 
 interface Props {
   state: ReturnType<typeof useDialog>;

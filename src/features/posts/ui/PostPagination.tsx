@@ -1,5 +1,5 @@
 import { useQueryPosts } from '../api/usePostsQueries';
-import { useUrlParams } from '../../lib/posts/useUrlParams';
+import { useUrlParams } from '../lib/useUrlParams';
 import {
   Button,
   Select,

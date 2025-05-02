@@ -3,8 +3,8 @@ import { postsQueryKeys } from '../config/postQueryKeys';
 import { postsApi } from '../../../entities/posts/api/postsApi';
 import { PostsUrlParams } from '../../../entities/posts/model/PostUrlParams';
 
-import type { Post } from '../../types';
-import { PostsResponse } from '../../types';
+import type { Post } from '../../../entities/posts/model';
+import { PostsResponse } from '../../../entities/posts/api/PostsResponse';
 
 /**
  * 게시글 목록 조회

@@ -1,4 +1,4 @@
-import type { UserResponse, UsersResponse } from '../../../types';
+import { UserResponse, UsersResponse } from '../../users/api/UserResponse';
 import { PostsUrlParams } from '../model/PostUrlParams';
 import { get, post, put, remove } from '../../../shared/api/fetchBased';
 import { getMswUrl } from '../../../shared/constants/mswUrl';

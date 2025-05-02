@@ -1,5 +1,5 @@
-import { Comment } from '../../types';
-import { useUrlParams } from '../../lib/posts/useUrlParams';
+import type { Comment } from '../../../entities/comments/model/Comment';
+import { useUrlParams } from '../../posts/lib/useUrlParams';
 import { Edit2, ThumbsUp, Trash2 } from 'lucide-react';
 import { Button } from '../../../shared/ui';
 import { HighlightedText } from '../../../shared/ui/HighlightedText';

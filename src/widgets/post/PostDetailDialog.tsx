@@ -1,8 +1,8 @@
-import { useUrlParams } from '../../lib/posts/useUrlParams';
+import { useUrlParams } from '../../features/posts/lib/useUrlParams';
 import { useDialog } from '../../features/dialog/model/useDialog';
 import { HighlightedText } from '../../shared/ui/HighlightedText';
 import { useSelectedPostStore } from '../../features/posts/model/useSelectedPostStore';
-import { BaseDialog } from '../ui/BaseDialog';
+import { BaseDialog } from '../../features/dialog/ui/BaseDialog';
 
 interface Props {
   state: ReturnType<typeof useDialog>;

@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../shared/ui';
-import { useUrlParams } from '../../lib/posts/useUrlParams';
+import { useUrlParams } from '../lib/useUrlParams';
 import { useTagsQuery } from '../../tags/api/useTagsQueries';
 
 export default function PostSearchFilter() {

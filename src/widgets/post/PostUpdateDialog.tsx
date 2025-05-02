@@ -1,6 +1,6 @@
-import { BaseDialog } from '../ui/BaseDialog';
+import { BaseDialog } from '../../features/dialog/ui/BaseDialog';
 import type { useDialog } from '../../features/dialog/model/useDialog';
-import { useUpdatePost } from '../../api/posts/usePostsMutations';
+import { useUpdatePost } from '../../features/posts/api';
 import { useSelectedPostStore } from '../../features/posts/model/useSelectedPostStore';
 import { Button, Input, Textarea } from '../../shared/ui';
 

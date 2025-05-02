@@ -1,6 +1,7 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 
-import { User, UsersResponse } from '../../types/User';
+import { User } from '../../../entities/users/model/User';
+import { UsersResponse } from '../../../entities/users/api/UserResponse';
 import { get } from '../../../shared/api/fetchBased';
 
 import { usersQueryKeys } from '../config/userQueryKeys';

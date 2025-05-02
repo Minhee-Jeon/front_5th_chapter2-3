@@ -6,7 +6,7 @@ import { useUserDialog } from '../features/dialog/model/useUserDialog';
 
 import PostAddDialog from '../widgets/post/PostAddDialog';
 import PostUpdateDialog from '../widgets/post/PostUpdateDialog';
-import UserDialog from '../widgets/UserDialog';
+import UserDialog from '../widgets/user/UserDialog';
 import PostTable from '../widgets/post/PostTable';
 import PostSearchFilter from '../features/posts/ui/PostSearchFilter';
 import PostDetailDialog from '../widgets/post/PostDetailDialog';

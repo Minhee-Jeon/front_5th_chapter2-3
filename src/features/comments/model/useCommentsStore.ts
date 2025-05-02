@@ -1,4 +1,4 @@
-import type { Comment } from '../../types';
+import type { Comment } from '../../../entities/comments/model/Comment';
 import { get as fetchGet } from '../../../shared/api/fetchBased';
 import { createStoreSelector } from '../../../shared/lib';
 import { create } from 'zustand';

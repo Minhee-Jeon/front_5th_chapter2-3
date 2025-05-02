@@ -1,10 +1,10 @@
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 
-import { postsApi } from '../../entities/posts/api/postsApi';
-import type { Post } from '../../types';
+import { postsApi } from '../../../entities/posts/api/postsApi';
+import type { Post } from '../../../entities/posts/model';
 
-import { postsQueryKeys } from '../../config/posts/postQueryKeys';
-import { useUrlParams } from '../../lib/posts/useUrlParams';
+import { postsQueryKeys } from '../config/postQueryKeys';
+import { useUrlParams } from '../lib/useUrlParams';
 
 export const useAddPost = () => {
   const queryClient = useQueryClient();

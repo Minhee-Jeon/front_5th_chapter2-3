@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import { createStoreSelector } from '../../../shared/lib';
 
-import type { Post } from '../../types';
+import type { Post } from '../../../entities/posts/model';
 
 export interface PostsStore {
   posts: Post[];

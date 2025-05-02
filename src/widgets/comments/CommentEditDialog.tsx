@@ -1,5 +1,5 @@
 import { Button, Textarea } from '../../shared/ui';
-import { BaseDialog } from '../ui/BaseDialog';
+import { BaseDialog } from '../../features/dialog/ui/BaseDialog';
 import { useDialog } from '../../features/dialog/model/useDialog';
 import { useCommentsStoreSelector } from '../../features/comments/model/useCommentsStore';
 import { useNewCommentStoreSelector } from '../../features/comments/model/useNewCommentStore';

@@ -1,4 +1,4 @@
-import type { Comment } from '../../types';
+import { Comment } from '../../../entities/comments/model/Comment';
 import { create } from 'zustand';
 import { createStoreSelector } from '../../../shared/lib';
 

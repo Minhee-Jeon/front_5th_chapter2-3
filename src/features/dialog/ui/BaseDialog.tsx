@@ -4,7 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '../../shared/ui';
+} from '../../../shared/ui';
 
 interface Props {
   open: boolean;

@@ -1,4 +1,4 @@
-import type { User } from '../../types';
+import type { User } from '../../../entities/users/model/User';
 import { useSelectedUserMutation } from '../../users/api/useUsersMutations';
 import { useDialog } from './useDialog';
 

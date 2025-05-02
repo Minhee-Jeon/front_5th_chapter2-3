@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { PostsUrlParams } from '../../entities/posts/model/PostUrlParams';
+import { PostsUrlParams } from '../../../entities/posts/model';
 
 /**
  * URL 쿼리 파라미터를 처리하는 훅

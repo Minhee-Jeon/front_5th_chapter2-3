@@ -1,10 +1,10 @@
-import { useDeletePost } from '../../api/posts/usePostsMutations';
-import { useUrlParams } from '../../lib/posts/useUrlParams';
+import { useUrlParams } from '../../features/posts/lib/useUrlParams';
+import { useDeletePost } from '../../features/posts/api';
 import { useQueryPostsWithUsers } from '../../features/posts/api/usePostsQueries';
 import { useSelectedPostStoreSelector } from '../../features/posts/model/useSelectedPostStore';
 import { useCommentsStoreSelector } from '../../features/comments/model/useCommentsStore';
-import { Post } from '../../entities/posts/model/Post';
-import { User } from '../../types';
+import type { Post } from '../../entities/posts/model/Post';
+import type { User } from '../../entities/users/model/User';
 import {
   Edit2,
   MessageSquare,

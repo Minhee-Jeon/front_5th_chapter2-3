@@ -1,5 +1,5 @@
 import { commentsApi } from '../../../entities/comments/api/commentsApi';
-import type { Comment } from '../../types';
+import type { Comment } from '../../../entities/comments/model/Comment';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const useCreateComment = () => {
